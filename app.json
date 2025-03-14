@@ -13,6 +13,12 @@
     "android": {
       "package": "rw.itec.myapp",
       "versionCode": 1
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "65517e24-ab4c-4b92-8329-c20345866eb6"
+      }
+    },
+    "owner": "dev-jean"
   }
 }
