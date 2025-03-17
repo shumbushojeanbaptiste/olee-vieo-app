@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, Image, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon library
 
 const { width } = Dimensions.get('window');
 
@@ -47,6 +48,23 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Logo and Action Bar Icons */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../assets/logo.png')} // Replace with your logo path
+          style={styles.logo}
+        />
+        <View style={styles.actionBarIcons}>
+          <TouchableOpacity onPress={() => console.log('Notifications pressed')}>
+            <Icon name="bell" size={20} color="#007BFF" style={styles.actionBarIcon} />
+          </TouchableOpacity>
+          {/* Sign-Up Icon */}
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <Icon name="user-plus" size={20} color="#007BFF" style={styles.actionBarIcon} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Header with Slide Show */}
       <View style={styles.header}>
         <ScrollView
@@ -75,13 +93,29 @@ export default function HomeScreen({ navigation }) {
           Easily find, predict, and navigate to available parking spaces
         </Text>
         <TouchableOpacity style={styles.languageButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.languageButtonText}>Login</Text>
+          <View style={styles.buttonContent}>
+            <Text style={styles.languageButtonText}>Login</Text>
+            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+          </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageSelect('Kinyarwanda')}>
-          <Text style={styles.languageButtonText}>Nearest Parking Spot</Text>
+          <View style={styles.buttonContent}>
+            <Text style={styles.languageButtonText}>Nearest Parking Spot</Text>
+            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+          </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageSelect('English')}>
-          <Text style={styles.languageButtonText}>Parking Slot Predictions</Text>
+          <View style={styles.buttonContent}>
+            <Text style={styles.languageButtonText}>Parking Slot Predictions</Text>
+            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+          </View>
+        </TouchableOpacity>
+        {/* Register Button */}
+        <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('SignUp')}>
+          <View style={styles.buttonContent}>
+            <Text style={styles.registerButtonText}>Register</Text>
+            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+          </View>
         </TouchableOpacity>
       </View>
     </View>
@@ -96,9 +130,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  logoContainer: {
+    position: 'absolute', // Position the logo container absolutely
+    top: 40, // Place it at the top of the screen
+    flexDirection: 'row', // Align logo and icons horizontally
+    alignItems: 'center', // Center items vertically
+    justifyContent: 'space-between', // Space out logo and icons
+    width: '100%', // Take full width
+    paddingHorizontal: 20, // Add horizontal padding
+  },
+  logo: {
+    width: 150, // Adjust width as needed
+    height: 50, // Adjust height as needed
+    resizeMode: 'contain', // Ensure the logo fits within the dimensions
+  },
+  actionBarIcons: {
+    flexDirection: 'row', // Align icons horizontally
+  },
+  actionBarIcon: {
+    marginLeft: 20, // Space between icons
+  },
   header: {
     width: '100%',
     height: 150, // Adjust height as needed
+    marginTop: 100, // Space for the logo and action bar
     marginBottom: 20,
   },
   headerSlide: {
@@ -116,10 +171,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-  },
-  welcomeText: {
-    fontSize: 18,
-    marginBottom: 20,
   },
   languageContainer: {
     width: '100%',
@@ -147,5 +198,25 @@ const styles = StyleSheet.create({
   languageButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  registerButton: {
+    width: '80%',
+    padding: 15,
+    backgroundColor: '#28a745', // Green color for the register button
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonContent: {
+    flexDirection: 'row', // Align text and icon horizontally
+    alignItems: 'center', // Center items vertically
+  },
+  buttonIcon: {
+    marginLeft: 10, // Space between text and icon
   },
 });
