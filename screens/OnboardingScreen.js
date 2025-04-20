@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center the button horizontally
   },
   doneButton: {
-    backgroundColor: '#007BFF', // Button background color
+    backgroundColor: '#1a237e', // Button background color
     paddingHorizontal: 40, // Horizontal padding for width
     paddingVertical: 15, // Vertical padding for height
     borderRadius: 30, // Rounded corners

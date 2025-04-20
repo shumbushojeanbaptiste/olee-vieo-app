@@ -5,16 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  FlatList,
+  ScrollView,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { SwipeListView } from 'react-native-swipe-list-view'; // Import SwipeListView
 
 const Dashboard = ({ navigation }) => {
-  const [isGridView, setIsGridView] = useState(false); // State to manage grid/list view
-  const [isMenuVisible, setIsMenuVisible] = useState(false); // State to manage 3-dot menu visibility
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Function to handle logout
   const handleLogout = () => {
     Alert.alert(
       'Log Out',
@@ -27,135 +26,136 @@ const Dashboard = ({ navigation }) => {
         {
           text: 'Log Out',
           style: 'destructive',
-          onPress: () => {
-            // Perform logout actions here (e.g., clear user session, navigate to login screen)
-            navigation.navigate('Login'); // Navigate to the login screen
-          },
+          onPress: () => navigation.navigate('Login'),
         },
       ],
       { cancelable: true }
     );
   };
 
-  // Default actions with icons
-  const defaultActions = [
-    { id: 1, icon: 'car', title: 'Park Now', onPress: () => navigation.navigate('ParkNow') },
-    { id: 2, icon: 'history', title: 'Parking History', onPress: () => navigation.navigate('ParkingHistory') },
-    { id: 3, icon: 'map-marker', title: 'Find Parking', onPress: () => navigation.navigate('FindParking') },
-    { id: 4, icon: 'credit-card', title: 'Payment Methods', onPress: () => navigation.navigate('PaymentMethods') },
-    { id: 5, icon: 'star', title: 'Rewards', onPress: () => navigation.navigate('Rewards') },
-    { id: 6, icon: 'cog', title: 'Settings', onPress: () => navigation.navigate('Settings') },
+  const menuItems = [
+    { icon: 'home', label: 'Home', screen: 'Home' },
+    { icon: 'user', label: 'Profile', screen: 'Profile' },
+    { icon: 'cog', label: 'Settings', screen: 'Settings' },
+    { icon: 'sign-out', label: 'Log Out', isLogout: true },
   ];
 
-  // Render item for grid view
-  const renderGridItem = ({ item }) => (
-    <TouchableOpacity style={styles.gridItem} onPress={item.onPress}>
-      <Icon name={item.icon} size={30} color="#007BFF" />
-      <Text style={styles.gridItemText}>{item.title}</Text>
-    </TouchableOpacity>
-  );
+  const dashboardCards = [
+    {
+      icon: 'search',
+      title: 'Find Patients',
+      description: 'Description of finding patients goes here, basic requirements',
+      screen: 'FindPatients',
+    },
+    {
+      icon: 'user-plus',
+      title: 'Register Patient',
+      description: 'Description of registering a patient goes here, basic requirements',
+      screen: 'RegisterPatient',
+    },
+    {
+      icon: 'wpforms',
+      title: 'Form Entry',
+      description: 'Description of form entry goes here, basic requirements',
+      screen: 'FormEntry',
+    },
+  ];
 
-  // Render hidden swipeable item (e.g., delete button)
-  const renderHiddenItem = (data, rowMap) => (
-    <View style={styles.hiddenItem}>
-      <TouchableOpacity
-        style={styles.hiddenButton}
-        onPress={() => Alert.alert('Delete', `Delete ${data.item.title}?`)}
-      >
-        <Icon name="trash" size={24} color="#fff" />
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Render visible swipeable item
-  const renderListItem = ({ item }) => (
-    <View style={styles.listItem}>
-      <Icon name={item.icon} size={24} color="#007BFF" style={styles.listItemIcon} />
-      <Text style={styles.listItemText}>{item.title}</Text>
-    </View>
+  // Filter cards based on search query
+  const filteredCards = dashboardCards.filter(card =>
+    card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    card.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <View style={styles.container}>
-      {/* Top Action Bar */}
-      <View style={styles.topActionBar}>
-        <Text style={styles.topActionBarTitle}>Menu</Text>
-        <View style={styles.topActionBarIcons}>
-          <TouchableOpacity onPress={() => console.log('Search pressed')}>
-            <Icon name="search" size={20} color="#007BFF" style={styles.topActionBarIcon} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsMenuVisible(!isMenuVisible)}>
-            <Icon name="ellipsis-v" size={20} color="#007BFF" style={styles.topActionBarIcon} />
-          </TouchableOpacity>
-        </View>
+    <View style={[styles.container, isDarkMode && styles.darkContainer]}>
+      {/* Header */}
+      <View style={[styles.header, isDarkMode && styles.darkHeader]}>
+        <Text style={[styles.headerTitle, isDarkMode && styles.darkHeaderTitle]}>
+          Parking-Services
+        </Text>
+        <TouchableOpacity onPress={() => setIsDarkMode(!isDarkMode)}>
+          <Icon
+            name={isDarkMode ? 'sun-o' : 'moon-o'}
+            size={20}
+            color={isDarkMode ? '#fff' : '#333'}
+          />
+        </TouchableOpacity>
       </View>
 
-      {/* 3-Dot Menu Options */}
-      {isMenuVisible && (
-        <View style={styles.menuOptions}>
-          <TouchableOpacity
-            style={styles.menuOption}
-            onPress={() => {
-              setIsGridView(true);
-              setIsMenuVisible(false);
-            }}
-          >
-            <Icon name="th-large" size={20} color="#007BFF" />
-            <Text style={styles.menuOptionText}>Grid View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.menuOption}
-            onPress={() => {
-              setIsGridView(false);
-              setIsMenuVisible(false);
-            }}
-          >
-            <Icon name="list" size={20} color="#007BFF" />
-            <Text style={styles.menuOptionText}>List View</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Default Actions (Grid or List View) */}
-      {isGridView ? (
-        <FlatList
-          data={defaultActions}
-          renderItem={renderGridItem}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2} // Display items in a grid
-          contentContainerStyle={styles.gridContainer}
+      {/* Search Bar */}
+      <View style={[styles.searchContainer, isDarkMode && styles.darkSearchContainer]}>
+        <Icon
+          name="search"
+          size={18}
+          color={isDarkMode ? '#aaa' : '#888'}
+          style={styles.searchIcon}
         />
-      ) : (
-        <SwipeListView
-          data={defaultActions}
-          renderItem={renderListItem}
-          renderHiddenItem={renderHiddenItem}
-          keyExtractor={(item) => item.id.toString()}
-          leftOpenValue={75} // Width of the hidden button
-          rightOpenValue={-75} // Width of the hidden button
-          contentContainerStyle={styles.listContainer}
+        <TextInput
+          style={[styles.searchInput, isDarkMode && styles.darkSearchInput]}
+          placeholder="Search services..."
+          placeholderTextColor={isDarkMode ? '#aaa' : '#888'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-      )}
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Icon
+              name="times-circle"
+              size={18}
+              color={isDarkMode ? '#aaa' : '#888'}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {/* Menu Bar */}
-      <View style={styles.menuBar}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Home')}>
-          <Icon name="home" size={20} color="#007BFF" />
-          <Text style={styles.menuItemText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Profile')}>
-          <Icon name="user" size={20} color="#007BFF" />
-          <Text style={styles.menuItemText}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
-          <Icon name="cog" size={20} color="#007BFF" />
-          <Text style={styles.menuItemText}>Settings</Text>
-        </TouchableOpacity>
-        {/* Log Out Button */}
-        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-          <Icon name="sign-out" size={20} color="#FF3B30" />
-          <Text style={[styles.menuItemText, { color: '#FF3B30' }]}>Log Out</Text>
-        </TouchableOpacity>
+      {/* Main Content */}
+      <ScrollView contentContainerStyle={styles.content}>
+        {filteredCards.map((card, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[styles.card, isDarkMode && styles.darkCard]}
+            onPress={() => navigation.navigate(card.screen)}
+          >
+            <View style={styles.cardHeader}>
+              <Icon 
+                name={card.icon} 
+                size={24} 
+                color={isDarkMode ? '#4DA6FF' : '#007BFF'} 
+              />
+              <Text style={[styles.cardTitle, isDarkMode && styles.darkCardTitle]}>
+                {card.title}
+              </Text>
+            </View>
+            <Text style={[styles.cardDescription, isDarkMode && styles.darkCardDescription]}>
+              {card.description}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Bottom Navigation */}
+      <View style={[styles.bottomNav, isDarkMode && styles.darkBottomNav]}>
+        {menuItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => item.isLogout ? handleLogout() : navigation.navigate(item.screen)}
+          >
+            <Icon
+              name={item.icon}
+              size={20}
+              color={item.isLogout ? '#FF3B30' : (isDarkMode ? '#fff' : '#007BFF')}
+            />
+            <Text style={[
+              styles.navLabel,
+              isDarkMode && styles.darkNavLabel,
+              item.isLogout && { color: '#FF3B30' }
+            ]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
@@ -164,127 +164,130 @@ const Dashboard = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
-  // Top Action Bar Styles
-  topActionBar: {
+  darkContainer: {
+    backgroundColor: '#121212',
+  },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50, // Adjust for status bar height
-    paddingBottom: 15,
-    backgroundColor: '#f8f8f8',
+    padding: 20,
+    paddingTop: 50,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#e0e0e0',
   },
-  topActionBarTitle: {
-    fontSize: 20,
+  darkHeader: {
+    backgroundColor: '#1f1f1f',
+    borderBottomColor: '#333',
+  },
+  headerTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
   },
-  topActionBarIcons: {
+  darkHeaderTitle: {
+    color: '#fff',
+  },
+  searchContainer: {
     flexDirection: 'row',
-  },
-  topActionBarIcon: {
-    marginLeft: 20,
-  },
-  // 3-Dot Menu Options Styles
-  menuOptions: {
-    position: 'absolute',
-    top: 90, // Adjust based on top action bar height
-    right: 20,
+    alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 5,
-    elevation: 5,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    margin: 15,
+    marginTop: 10,
+    height: 45,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  darkSearchContainer: {
+    backgroundColor: '#1f1f1f',
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    height: '100%',
+    color: '#333',
+  },
+  darkSearchInput: {
+    color: '#fff',
+  },
+  content: {
+    padding: 15,
+    paddingBottom: 70,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    padding: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  menuOption: {
+  darkCard: {
+    backgroundColor: '#1f1f1f',
+  },
+  cardHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 12,
+  },
+  darkCardTitle: {
+    color: '#fff',
+  },
+  cardDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  darkCardDescription: {
+    color: '#aaa',
+  },
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 10,
-  },
-  menuOptionText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 10,
-  },
-  // Grid View Styles
-  gridContainer: {
-    padding: 10,
-  },
-  gridItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 10,
-    padding: 20,
     backgroundColor: '#f8f8f8',
-    borderRadius: 10,
-  },
-  gridItemText: {
-    fontSize: 14,
-    color: '#333',
-    marginTop: 10,
-  },
-  // List View Styles
-  listContainer: {
-    padding: 20,
-  },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  listItemIcon: {
-    marginRight: 15,
-  },
-  listItemText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  // Hidden Swipeable Item Styles
-  hiddenItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    backgroundColor: '#FF3B30',
-    paddingRight: 20,
-  },
-  hiddenButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 75,
-    height: '100%',
-  },
-  // Menu Bar Styles
-  menuBar: {
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
-    backgroundColor: '#f8f8f8',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
   },
-  menuItem: {
-    alignItems: 'center',
+  darkBottomNav: {
+    backgroundColor: '#1f1f1f',
+    borderTopColor: '#333',
   },
-  menuItemText: {
+  navItem: {
+    alignItems: 'center',
+    padding: 5,
+  },
+  navLabel: {
     fontSize: 12,
-    color: '#007BFF',
     marginTop: 5,
+    color: '#007BFF',
+  },
+  darkNavLabel: {
+    color: '#fff',
   },
 });
 

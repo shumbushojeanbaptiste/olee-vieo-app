@@ -1,69 +1,84 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // For icons
 
 const ProfileScreen = ({ route }) => {
-  // Dummy user data (replace with real data from your app state or API)
-  const user = {
-    name: 'Jean Baptiste SHUMBUSHO',
-    phone: '+250 788 644 687',
-    email: 'shumbushojean1@gmail.com',
-    location: 'Kigali, RWANDA',
-    profileImage: require('../assets/userLogin.jpg'), // Replace with your image path
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Dummy historical data (replace with real data from your app state or API)
-  const historicalData = [
-    { id: 1, action: 'Logged in', timestamp: '2023-10-01 10:00 AM' },
-    { id: 2, action: 'Updated profile', timestamp: '2023-10-02 11:30 AM' },
-    { id: 3, action: 'Booked parking spot', timestamp: '2023-10-03 02:15 PM' },
-    { id: 4, action: 'Logged out', timestamp: '2023-10-04 05:45 PM' },
-    { id: 5, action: 'Changed password', timestamp: '2023-10-05 09:00 AM' },
-    { id: 6, action: 'Viewed parking history', timestamp: '2023-10-06 12:30 PM' },
-    { id: 7, action: 'Logged in', timestamp: '2023-10-07 08:00 AM' },
-    { id: 8, action: 'Booked parking spot', timestamp: '2023-10-08 03:20 PM' },
-    { id: 9, action: 'Logged out', timestamp: '2023-10-09 06:10 PM' },
-    { id: 10, action: 'Updated profile', timestamp: '2023-10-10 10:45 AM' },
-  ];
+  // Fetch profile data from local API
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        // Replace with your local API endpoint
+        const response = await fetch('http://192.168.8.111:5000/read'); // Use your computer's IP address
+        const data = await response.json();
+
+        // Assuming the API returns an array of users, take the first user
+        if (data.length > 0) {
+          setUser(data[0]);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1a237e" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Profile Image */}
-      <Image source={user.profileImage} style={styles.profileImage} />
+      {/* Profile Image (if available) */}
+      {user?.profileImage && (
+        <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+      )}
 
       {/* User Information */}
       <View style={styles.infoContainer}>
         <View style={styles.infoItem}>
-          <Icon name="user" size={20} color="#007BFF" style={styles.icon} />
-          <Text style={styles.infoText}>{user.name}</Text>
+          <Icon name="user" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>{user?.names}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Icon name="phone" size={20} color="#007BFF" style={styles.icon} />
-          <Text style={styles.infoText}>{user.phone}</Text>
+          <Icon name="phone" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>{user?.phone || 'N/A'}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Icon name="envelope" size={20} color="#007BFF" style={styles.icon} />
-          <Text style={styles.infoText}>{user.email}</Text>
+          <Icon name="envelope" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>{user?.email || 'N'}</Text>
         </View>
         <View style={styles.infoItem}>
-          <Icon name="map-marker" size={20} color="#007BFF" style={styles.icon} />
-          <Text style={styles.infoText}>{user.location}</Text>
+          <Icon name="map-marker" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>{user?.country}</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Icon name="graduation-cap" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>{user?.department}</Text>
+        </View>
+        <View style={styles.infoItem}>
+          <Icon name="star" size={20} color="#1a237e" style={styles.icon} />
+          <Text style={styles.infoText}>Mark: {user?.mark}</Text>
         </View>
       </View>
-
-      {/* Historical Data Section */}
-      <Text style={styles.sectionTitle}>Recent Activities</Text>
-      <ScrollView style={styles.historyContainer}>
-        {historicalData.map((item) => (
-          <View key={item.id} style={styles.historyItem}>
-            <Icon name="clock-o" size={16} color="#666" style={styles.historyIcon} />
-            <View style={styles.historyTextContainer}>
-              <Text style={styles.historyAction}>{item.action}</Text>
-              <Text style={styles.historyTimestamp}>{item.timestamp}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
     </View>
   );
 };
@@ -75,6 +90,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#FF3B30',
+  },
   profileImage: {
     width: 150,
     height: 150,
@@ -84,7 +113,6 @@ const styles = StyleSheet.create({
   infoContainer: {
     width: '100%',
     marginBottom: 20,
-    
   },
   infoItem: {
     flexDirection: 'row',
@@ -97,37 +125,6 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     color: '#333',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    alignSelf: 'flex-start',
-  },
-  historyContainer: {
-    width: '100%',
-  },
-  historyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 5,
-  },
-  historyIcon: {
-    marginRight: 10,
-  },
-  historyTextContainer: {
-    flex: 1,
-  },
-  historyAction: {
-    fontSize: 14,
-    color: '#333',
-  },
-  historyTimestamp: {
-    fontSize: 12,
-    color: '#666',
   },
 });
 

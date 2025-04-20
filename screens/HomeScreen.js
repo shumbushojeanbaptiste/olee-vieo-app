@@ -55,12 +55,14 @@ export default function HomeScreen({ navigation }) {
           style={styles.logo}
         />
         <View style={styles.actionBarIcons}>
-          <TouchableOpacity onPress={() => console.log('Notifications pressed')}>
-            <Icon name="bell" size={20} color="#007BFF" style={styles.actionBarIcon} />
+          <TouchableOpacity onPress={() => console.log('Like pressed')}>
+            <Icon name="heart" size={20} color="rgb(75, 68, 161)" style={styles.actionBarIcon} />
           </TouchableOpacity>
-          {/* Sign-Up Icon */}
+          <TouchableOpacity onPress={() => console.log('Notifications pressed')}>
+            <Icon name="bell" size={20} color="#1a237e" style={styles.actionBarIcon} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Icon name="user-plus" size={20} color="#007BFF" style={styles.actionBarIcon} />
+            <Icon name="user-plus" size={20} color="#1a237e" style={styles.actionBarIcon} />
           </TouchableOpacity>
         </View>
       </View>
@@ -104,17 +106,17 @@ export default function HomeScreen({ navigation }) {
             <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageSelect('English')}>
+        <TouchableOpacity style={styles.languageButton} onPress={() => navigation.navigate('Chat')}>
           <View style={styles.buttonContent}>
-            <Text style={styles.languageButtonText}>Parking Slot Predictions</Text>
+            <Text style={styles.languageButtonText}>Assistant and Discuss with us</Text>
             <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
           </View>
         </TouchableOpacity>
         {/* Register Button */}
         <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('SignUp')}>
           <View style={styles.buttonContent}>
-            <Text style={styles.registerButtonText}>Register</Text>
-            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+            <Text style={styles.registerButtonText}>Create an account</Text>
+            <Icon name="long-arrow-right" size={16} color="#000" style={styles.buttonIcon} />
           </View>
         </TouchableOpacity>
       </View>
@@ -128,19 +130,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 5,
   },
   logoContainer: {
     position: 'absolute', // Position the logo container absolutely
-    top: 40, // Place it at the top of the screen
+    top: 50, // Place it at the top of the screen
     flexDirection: 'row', // Align logo and icons horizontally
     alignItems: 'center', // Center items vertically
     justifyContent: 'space-between', // Space out logo and icons
     width: '100%', // Take full width
-    paddingHorizontal: 20, // Add horizontal padding
+    paddingHorizontal: 5, // Add horizontal padding
   },
   logo: {
-    width: 150, // Adjust width as needed
+    width: 200, // Adjust width as needed
     height: 50, // Adjust height as needed
     resizeMode: 'contain', // Ensure the logo fits within the dimensions
   },
@@ -202,15 +204,18 @@ const styles = StyleSheet.create({
   registerButton: {
     width: '80%',
     padding: 15,
-    backgroundColor: '#28a745', // Green color for the register button
-    borderRadius: 5,
+    backgroundColor: '#fff',
+    borderRadius: 25,
     marginBottom: 10,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#1a237e',
   },
   registerButtonText: {
-    color: '#fff',
+    color: '#1a237e',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   buttonContent: {
     flexDirection: 'row', // Align text and icon horizontally

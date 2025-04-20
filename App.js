@@ -9,6 +9,7 @@ import LoginScreen from './screens/LoginScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import ProfileScreen from './screens/ProfileScreen'; // Import the ProfileScreen
+import ChatScreen from './screens/ChatScreen'; // Add this import
 import { Image } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -59,7 +60,7 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: '#007BFF',
+                backgroundColor: '#1a237e',
               },
               headerTintColor: '#fff',
             }}
@@ -80,7 +81,7 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: '#007BFF',
+                backgroundColor: '#1a237e',
               },
               headerTintColor: '#fff',
             }}
@@ -100,7 +101,27 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: '#007BFF',
+                backgroundColor: '#1a237e',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+            {/* Add ChatScreen to the navigation stack */}
+            <Stack.Screen
+            name="Chat"
+            component={ChatScreen}
+            options={{
+              title: 'Parking Assistant',
+              headerRight: () => (
+                <View style={{ marginRight: 15 }}>
+                  <Image
+                    source={require('./assets/logo.png')}
+                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                  />
+                </View>
+              ),
+              headerStyle: {
+                backgroundColor: '#1a237e',
               },
               headerTintColor: '#fff',
             }}
@@ -121,7 +142,7 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: '#007BFF',
+                backgroundColor: '#1a237e',
               },
               headerTintColor: '#fff',
             }}
