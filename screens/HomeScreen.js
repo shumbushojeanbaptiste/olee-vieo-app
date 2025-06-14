@@ -100,12 +100,15 @@ export default function HomeScreen({ navigation }) {
             <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.languageButton} onPress={() => handleLanguageSelect('Kinyarwanda')}>
-          <View style={styles.buttonContent}>
-            <Text style={styles.languageButtonText}>Nearest Parking Spot</Text>
-            <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
-          </View>
-        </TouchableOpacity>
+        <TouchableOpacity 
+  style={styles.languageButton} 
+  onPress={() => navigation.navigate('Near')}
+>
+  <View style={styles.buttonContent}>
+    <Text style={styles.languageButtonText}>Nearest Parking Spot</Text>
+    <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
+  </View>
+</TouchableOpacity>
         <TouchableOpacity style={styles.languageButton} onPress={() => navigation.navigate('Chat')}>
           <View style={styles.buttonContent}>
             <Text style={styles.languageButtonText}>Assistant and Discuss with us</Text>

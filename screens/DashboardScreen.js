@@ -10,9 +10,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const Dashboard = ({ navigation }) => {
+const Dashboard = ({ navigation, route }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { username } = route.params || {}; // Retrieve the logged-in user's information
 
   const handleLogout = () => {
     Alert.alert(
@@ -34,9 +35,7 @@ const Dashboard = ({ navigation }) => {
   };
 
   const menuItems = [
-    { icon: 'home', label: 'Home', screen: 'Home' },
     { icon: 'user', label: 'Profile', screen: 'Profile' },
-    { icon: 'cog', label: 'Settings', screen: 'Settings' },
     { icon: 'sign-out', label: 'Log Out', isLogout: true },
   ];
 
@@ -82,6 +81,14 @@ const Dashboard = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
+
+      {/* Welcome Message */}
+      <Text style={[styles.welcomeTitle, isDarkMode && styles.darkWelcomeTitle]}>
+        Welcome, {username || 'User'}!
+      </Text>
+      <Text style={[styles.welcomeSubtitle, isDarkMode && styles.darkWelcomeSubtitle]}>
+        This is your dashboard.
+      </Text>
 
       {/* Search Bar */}
       <View style={[styles.searchContainer, isDarkMode && styles.darkSearchContainer]}>
@@ -156,6 +163,26 @@ const Dashboard = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         ))}
+        {/* Chatbot Icon */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Chat', { username })}
+        >
+          <Icon name="comments" size={24} color={isDarkMode ? '#fff' : '#007BFF'} />
+          <Text style={[styles.navLabel, isDarkMode && styles.darkNavLabel]}>
+            AI-Assistant
+          </Text>
+        </TouchableOpacity>
+        {/* History Icon */}
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('History')}
+        >
+          <Icon name="history" size={24} color={isDarkMode ? '#fff' : '#007BFF'} />
+          <Text style={[styles.navLabel, isDarkMode && styles.darkNavLabel]}>
+            History
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -190,6 +217,25 @@ const styles = StyleSheet.create({
   },
   darkHeaderTitle: {
     color: '#fff',
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginHorizontal: 15,
+    marginTop: 10,
+    color: '#333',
+  },
+  darkWelcomeTitle: {
+    color: '#fff',
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    marginHorizontal: 15,
+    marginBottom: 10,
+    color: '#555',
+  },
+  darkWelcomeSubtitle: {
+    color: '#aaa',
   },
   searchContainer: {
     flexDirection: 'row',

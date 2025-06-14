@@ -10,6 +10,12 @@ import DashboardScreen from './screens/DashboardScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import ProfileScreen from './screens/ProfileScreen'; // Import the ProfileScreen
 import ChatScreen from './screens/ChatScreen'; // Add this import
+import NearScreen from './screens/NearScreen';
+import ParkingDetails from './screens/ParkingDetails';
+import HistoryScreen from './screens/HistoryScreen';
+
+
+
 import { Image } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -46,6 +52,15 @@ export default function App() {
             options={{ headerShown: false }}
           />
 
+<Stack.Screen name="Near" component={NearScreen} />
+
+        <Stack.Screen name="NearScreen" component={NearScreen} />
+        <Stack.Screen name="ParkingDetails" component={ParkingDetails} />
+        
+<Stack.Screen name="History" component={HistoryScreen} />
+        {/* <Stack.Screen name="Chat me" component={ChatScreen} /> */}
+      
+
           {/* Login Screen */}
           <Stack.Screen
             name="Login"
@@ -71,7 +86,7 @@ export default function App() {
             name="SignUp"
             component={SignUpScreen}
             options={{
-              title: 'Sign Up',
+              title: 'Create an account',
               headerRight: () => (
                 <View style={{ marginRight: 15 }}>
                   <Image

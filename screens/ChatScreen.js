@@ -27,7 +27,7 @@ const ChatScreen = ({ navigation }) => {
 
   const callAIModel = async (userMessage) => {
     try {
-      const response = await axios.post('http://192.168.1.112:5000/ask', {
+      const response = await axios.post('http://192.168.40.53:5000/ask', {
         question: userMessage
       }, {
         headers: {
