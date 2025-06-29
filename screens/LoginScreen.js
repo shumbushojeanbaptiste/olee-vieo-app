@@ -9,67 +9,66 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon library
-import Toast from 'react-native-toast-message'; // Import Toast library
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // State for loading indicator
-  const [isSuccess, setIsSuccess] = useState(false); // State for success tick
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleLogin = () => {
-    if (!username) {
-      Alert.alert('Validation Failed', 'Username is required');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Validation Failed', 'Email and password are required');
       return;
     }
 
-    // Simulate a login process
-    setIsLoading(true); // Show loading indicator
-    setTimeout(() => {
-      if (username === 'admin' && password === '1234') {
-        setIsSuccess(true); // Show success tick
-        // Show success Toast
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('http://192.168.1.86:8000/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save user data to AsyncStorage
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        
+        setIsSuccess(true);
         Toast.show({
-          type: 'success', // Type of Toast (success, error, info)
-          text1: 'Login Successful', // Title
-          text2: 'Welcome back!', // Subtitle
+          type: 'success',
+          text1: 'Login Successful',
+          text2: data.message,
         });
 
-        // Show success Alert with a button to confirm navigation
-        Alert.alert(
-          'Login Successful',
-          'Welcome back! Do you want to proceed to the dashboard?',
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel', // Cancel button
-              onPress: () => {
-                setIsLoading(false); // Reset loading state
-                setIsSuccess(false); // Reset success state
-              },
-            },
-            {
-              text: 'Proceed',
-              onPress: () => {
-                setIsLoading(false); // Reset loading state
-                setIsSuccess(false); // Reset success state
-                navigation.navigate('Dashboard'); // Navigate on confirmation
-              },
-            },
-          ]
-        );
+        // Navigate to Dashboard after successful login
+        setTimeout(() => {
+          setIsLoading(false);
+          navigation.navigate('Dashboard');
+        }, 1500);
       } else {
-        // Show error Toast for invalid credentials
-        Toast.show({
-          type: 'error',
-          text1: 'Login Failed',
-          text2: 'Invalid username or password',
-        });
-        setIsLoading(false); // Reset loading state
-        setIsSuccess(false); // Reset success state
+        throw new Error(data.message || 'Login failed');
       }
-    }, 2000); // Simulate a 2-second delay for the login process
+    } catch (error) {
+      setIsLoading(false);
+      setIsSuccess(false);
+      Toast.show({
+        type: 'error',
+        text1: 'Login Failed',
+        text2: error.message,
+      });
+    }
   };
 
   return (
@@ -86,17 +85,19 @@ export default function LoginScreen({ navigation }) {
 
       {/* User Icon Image */}
       <Image
-        source={require('../assets/userLogin.jpg')} // Replace with your image path
+        source={require('../assets/userLogin.jpg')}
         style={styles.userIcon}
       />
       <Text style={styles.title}>ParkFinder</Text>
 
-      {/* Username Input */}
+      {/* Email Input */}
       <TextInput
         style={styles.input}
-        placeholder="Enter Username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Enter Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       {/* Password Input */}
@@ -108,17 +109,17 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
       />
 
-      {/* Login Button with Arrow Icon or Success Tick */}
+      {/* Login Button */}
       <TouchableOpacity
-        style={[styles.loginButton, isLoading && styles.disabledButton]} // Disable button style
+        style={[styles.loginButton, isLoading && styles.disabledButton]}
         onPress={handleLogin}
-        disabled={isLoading || isSuccess} // Disable button when loading or success
+        disabled={isLoading || isSuccess}
       >
         <View style={styles.buttonContent}>
           {isLoading ? (
-            <ActivityIndicator color="#fff" /> // Show loading indicator
+            <ActivityIndicator color="#fff" />
           ) : isSuccess ? (
-            <Icon name="check" size={20} color="#fff" /> // Show success tick
+            <Icon name="check" size={20} color="#fff" />
           ) : (
             <>
               <Text style={styles.loginButtonText}>Log in</Text>
@@ -138,16 +139,16 @@ export default function LoginScreen({ navigation }) {
 
       {/* Add OTP and Email Verification Description */}
       <Text style={styles.description}>
-        For additional security, we offer **OTP verification**. After you log in with
-        the correct username and password. You may also need to verify your email for the first-time login.
+        For additional security, we offer OTP verification. After you log in with
+        the correct email and password. You may also need to verify your email for the first-time login.
       </Text>
 
       {/* Forgot Password and Support Links */}
       <View style={styles.linkContainer}>
-        <TouchableOpacity onPress={() => alert('Forgot Password clicked')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={styles.link}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => alert('Support clicked')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Support')}>
           <Text style={styles.link}>Need Support?</Text>
         </TouchableOpacity>
       </View>
@@ -158,6 +159,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
+// Keep the same styles as before
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -228,11 +230,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonContent: {
-    flexDirection: 'row', // Align text and icon horizontally
-    alignItems: 'center', // Center items vertically
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   buttonIcon: {
-    marginLeft: 10, // Space between text and icon
+    marginLeft: 10,
   },
   createAccountButton: {
     width: '85%',

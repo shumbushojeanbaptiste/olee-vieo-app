@@ -13,6 +13,11 @@ import ChatScreen from './screens/ChatScreen'; // Add this import
 import NearScreen from './screens/NearScreen';
 import ParkingDetails from './screens/ParkingDetails';
 import HistoryScreen from './screens/HistoryScreen';
+import ZoneRecommendationScreen from './screens/ZoneRecommendationScreen'; // Add this import
+import BookingSuccess from './screens/BookingSuccess';
+import BookingList from './screens/BookingListScreen';
+
+
 
 
 
@@ -53,10 +58,16 @@ export default function App() {
           />
 
 <Stack.Screen name="Near" component={NearScreen} />
+  <Stack.Screen 
+          name="ZoneRecommendation" 
+          component={ZoneRecommendationScreen} 
+          options={{ title: 'Recommended Zones' }}
+        />
+<Stack.Screen name="BookingSuccess" component={BookingSuccess} />
 
         <Stack.Screen name="NearScreen" component={NearScreen} />
         <Stack.Screen name="ParkingDetails" component={ParkingDetails} />
-        
+        <Stack.Screen name="BookingList" component={BookingList} />
 <Stack.Screen name="History" component={HistoryScreen} />
         {/* <Stack.Screen name="Chat me" component={ChatScreen} /> */}
       
@@ -70,7 +81,7 @@ export default function App() {
                 <View style={{ marginRight: 15 }}>
                   <Image
                     source={require('./assets/logo.png')} // Replace with your logo path
-                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                    style={{ width: 120, height: 50, resizeMode: 'contain' }}
                   />
                 </View>
               ),
@@ -111,7 +122,7 @@ export default function App() {
                 <View style={{ marginRight: 15 }}>
                   <Image
                     source={require('./assets/logo.png')}
-                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                    style={{ width: 100, height: 50, resizeMode: 'contain' }}
                   />
                 </View>
               ),
@@ -131,7 +142,7 @@ export default function App() {
                 <View style={{ marginRight: 15 }}>
                   <Image
                     source={require('./assets/logo.png')}
-                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                    style={{ width: 100, height: 50, resizeMode: 'contain' }}
                   />
                 </View>
               ),

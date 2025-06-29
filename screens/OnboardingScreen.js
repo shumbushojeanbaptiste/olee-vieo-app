@@ -34,23 +34,23 @@ const OnboardingScreen = ({ navigation }) => {
             backgroundColor: '#fff',
             image: (
               <Image
-                source={require('../assets/userLogin.jpg')} // Replace with your image path
+                source={require('../assets/available.png')} // Replace with your image path
                 style={styles.image}
               />
             ),
             title: 'Real-Time Parking Availability',
-            subtitle: 'Get real-time updates on parking slot availability.',
+            subtitle: 'Get real-time updates on available parking slot',
           },
           {
             backgroundColor: '#fff',
             image: (
               <Image
-                source={require('../assets/trackImage.png')} // Replace with your image path
+                source={require('../assets/zone.png')} // Replace with your image path
                 style={styles.image}
               />
             ),
-            title: 'Future Parking Predictions',
-            subtitle: 'Predict future parking availability and plan ahead.',
+            title: 'Zone Recommendation',
+            subtitle: ' Intelligently suggest optimal parking zones for drivers',
           },
         ]}
       />

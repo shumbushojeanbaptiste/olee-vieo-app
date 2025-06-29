@@ -7,20 +7,22 @@ const { width } = Dimensions.get('window');
 const headerSlides = [
   {
     id: '1',
-    title: 'Real-Time Parking Slot Availability',
-    image: require('../assets/trackImage.png'), // Replace with your image path
+    title: 'Spark 30 - TECNO Smartphones',
+    image: require('../assets/tecno.png'),
+    titleColor: '#1a237e', // Deep blue
   },
   {
     id: '2',
-    title: 'Future Parking Slot Predictions',
-    image: require('../assets/userLogin.jpg'), // Replace with your image path
+    title: 'Mango 4G-TUNGA eSIM',
+    image: require('../assets/mango.png'),
+    titleColor: '#c62828', // Red
   },
   {
     id: '3',
-    title: 'Find the Nearest Parking Spot',
-    image: require('../assets/trackImage.png'), // Replace with your image path
+    title: 'MTN-Rwanda (Bundles,Smart Phone)',
+    image: require('../assets/mtn.png'),
+    titleColor: '#00000', // Green
   },
-  // Add more slides as needed
 ];
 
 export default function HomeScreen({ navigation }) {
@@ -55,12 +57,8 @@ export default function HomeScreen({ navigation }) {
           style={styles.logo}
         />
         <View style={styles.actionBarIcons}>
-          <TouchableOpacity onPress={() => console.log('Like pressed')}>
-            <Icon name="heart" size={20} color="rgb(75, 68, 161)" style={styles.actionBarIcon} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('Notifications pressed')}>
-            <Icon name="bell" size={20} color="#1a237e" style={styles.actionBarIcon} />
-          </TouchableOpacity>
+    
+        
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Icon name="user-plus" size={20} color="#1a237e" style={styles.actionBarIcon} />
           </TouchableOpacity>
@@ -79,12 +77,14 @@ export default function HomeScreen({ navigation }) {
             setCurrentHeaderSlide(slideIndex);
           }}
         >
-          {headerSlides.map((slide) => (
-            <View key={slide.id} style={styles.headerSlide}>
-              <Text style={styles.appTitle}>{slide.title}</Text>
-              <Image source={slide.image} style={styles.icon} />
-            </View>
-          ))}
+       {headerSlides.map((slide) => (
+  <View key={slide.id} style={styles.headerSlide}>
+    <Text style={[styles.appTitle, {color: slide.titleColor}]}>
+      {slide.title}
+    </Text>
+    <Image source={slide.image} style={styles.icon} />
+  </View>
+))}
         </ScrollView>
       </View>
 
@@ -133,20 +133,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 5,
+    padding: 2,
   },
   logoContainer: {
     position: 'absolute', // Position the logo container absolutely
     top: 50, // Place it at the top of the screen
+   
     flexDirection: 'row', // Align logo and icons horizontally
     alignItems: 'center', // Center items vertically
     justifyContent: 'space-between', // Space out logo and icons
     width: '100%', // Take full width
-    paddingHorizontal: 5, // Add horizontal padding
+    paddingHorizontal: 10, // Add horizontal padding
   },
   logo: {
-    width: 200, // Adjust width as needed
-    height: 50, // Adjust height as needed
+    width: 100, // Adjust width as needed
+    height: 70, // Adjust height as needed
     resizeMode: 'contain', // Ensure the logo fits within the dimensions
   },
   actionBarIcons: {
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   languageButton: {
     width: '80%',
     padding: 15,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#1a237e',
     borderRadius: 5,
     marginBottom: 10,
     alignItems: 'center',

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MyApp",
-    "slug": "myapp",
+    "name": "ParkFinder",
+    "slug": "ParkFinder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,12 +11,12 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
-      "package": "rw.itec.myapp",
+      "package": "rw.itec.parkfinder",
       "versionCode": 1
     },
     "extra": {
       "eas": {
-        "projectId": "65517e24-ab4c-4b92-8329-c20345866eb6"
+        "projectId": "3fc0a77a-c58d-40c6-b55d-f15b5947ae08"
       }
     },
     "owner": "dev-jean"

@@ -17,7 +17,7 @@ const ChatScreen = ({ navigation }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: 'Hello! I am your healthcare assistant. How can I help you today?',
+      text: 'Hello! I am your parking assistant. How can I help you today?',
       isUser: false,
     },
   ]);
@@ -27,7 +27,7 @@ const ChatScreen = ({ navigation }) => {
 
   const callAIModel = async (userMessage) => {
     try {
-      const response = await axios.post('http://192.168.40.53:5000/ask', {
+      const response = await axios.post('http://192.168.1.86:5000/ask', {
         question: userMessage
       }, {
         headers: {
