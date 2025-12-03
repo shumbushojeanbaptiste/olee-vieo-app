@@ -14,11 +14,11 @@
       "package": "rw.itec.parkfinder",
       "versionCode": 1
     },
+    "owner": "dev-jean",
     "extra": {
       "eas": {
-        "projectId": "3fc0a77a-c58d-40c6-b55d-f15b5947ae08"
+        "projectId": "9d7168da-0a35-414f-9fc5-473aca5cbe82"
       }
-    },
-    "owner": "dev-jean"
+    }
   }
 }

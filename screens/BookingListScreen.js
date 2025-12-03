@@ -19,7 +19,7 @@ const BookingList = ({ route }) => {
       // Fetching
       for (const parkId of uniqueParkIds) {
         try {
-          const res = await fetch(`http://192.168.1.86:8000/parkings/id/${parkId}`);
+          const res = await fetch(`http://10.213.112.130:8000/parkings/id/${parkId}`);
           const data = await res.json();
           infoMap[String(parkId)] = data; // Always use string key
         } catch (e) {

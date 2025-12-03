@@ -16,8 +16,10 @@ const NearScreen = ({ navigation }) => {
 
   // Static coordinates
   const staticLocation = {
-    latitude: -1.9465,
-    longitude: 30.0585
+    // latitude: -1.689032008033469,
+     latitude:-1.9405845671809123,
+    // longitude: 29.9198627137943
+     longitude:30.065678763368062
   };
 
   useEffect(() => {
@@ -31,7 +33,7 @@ const NearScreen = ({ navigation }) => {
       const dayOfWeek = now.getDay();
       const hour = now.getHours();
       
-      const response = await fetch('http://192.168.1.86:8000/parkings-with-prediction-location', {
+      const response = await fetch('http://10.213.112.130:8000/parkings-with-prediction-location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +78,7 @@ const NearScreen = ({ navigation }) => {
     return {
       icon: 'map-marker',
       title: spot.full_park_name,
-      description: `${spot.predicted_availability_percent.toFixed(2)} % available | ${Math.round(spot.parking_lots * (spot.predicted_availability_percent / 100))} spots `,
+      description: `${spot.predicted_availability_percent.toFixed(2)} % available | ${Math.round((spot.available_slots))} spots `,
       address: spot.address || 'Address not available', // Use API address or fallback
       rate: `${spot.distance}`,
       phone: spot.phone || '123-456-7890',

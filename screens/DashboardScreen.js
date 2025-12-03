@@ -35,6 +35,14 @@ const Dashboard = ({ navigation }) => {
   const [priceLoading, setPriceLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('MoMo');
 
+  // New states for parking booking
+  const [parkings, setParkings] = useState([]);
+  const [parkingLoading, setParkingLoading] = useState(false);
+  const [selectedParking, setSelectedParking] = useState(null);
+  const [pricePlans, setPricePlans] = useState([]);
+  const [reservedHour, setReservedHour] = useState(1);
+  const [amount, setAmount] = useState(0);
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -69,7 +77,7 @@ const Dashboard = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.86:8000/recommend-zone-details', {
+      const response = await fetch('http://10.213.112.130:8000/recommend-zone-details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tot_hours: numHours })
@@ -96,7 +104,7 @@ const Dashboard = ({ navigation }) => {
 
     setPriceLoading(true);
     try {
-      const response = await fetch('http://192.168.1.86:8000/predict/predict-price', {
+      const response = await fetch('http://10.213.112.130:8000/predict/predict-price', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ hours: 1 })
@@ -120,6 +128,38 @@ const Dashboard = ({ navigation }) => {
     }
   };
 
+  // Fetch parkings when modal opens
+  useEffect(() => {
+    if (showBookingModal) {
+      setParkingLoading(true);
+      fetch('http://10.213.112.130:8000/parkings')
+        .then(res => res.json())
+        .then(data => setParkings(data))
+        .catch(() => setParkings([]))
+        .finally(() => setParkingLoading(false));
+    }
+  }, [showBookingModal]);
+
+  // Fetch price plans when parking or reservedHour changes
+  useEffect(() => {
+    if (selectedParking) {
+      fetch(`http://10.213.112.130:8000/park_prices/by_plan/${selectedParking.parking_id}`)
+        .then(res => res.json())
+        .then(data => setPricePlans(data))
+        .catch(() => setPricePlans([]));
+    }
+  }, [selectedParking]);
+
+  // Update amount when reservedHour or pricePlans changes
+  useEffect(() => {
+    if (pricePlans.length > 0 && reservedHour) {
+      const plan = pricePlans.find(p => Number(p.price_plan) === Number(reservedHour));
+      setAmount(plan ? plan.price : 0);
+    } else {
+      setAmount(0);
+    }
+  }, [pricePlans, reservedHour]);
+
   const handleCreateBooking = async () => {
     try {
       const storedUser = await AsyncStorage.getItem('userData');
@@ -130,7 +170,11 @@ const Dashboard = ({ navigation }) => {
 
       // Validate date format and range
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to midnight
+
       const inputDate = new Date(bookingDate);
+      inputDate.setHours(0, 0, 0, 0); // Set to midnight
+
       const diffDays = Math.floor((inputDate - today) / (1000 * 60 * 60 * 24));
 
       if (!/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
@@ -138,7 +182,7 @@ const Dashboard = ({ navigation }) => {
         return;
       }
       if (isNaN(inputDate.getTime()) || diffDays < 0 || diffDays > 6) {
-        Alert.alert('Invalid Date', 'Date must be within the next 7 days from today.');
+        Alert.alert('Invalid Date', 'Date must be today or within the next 7 days.');
         return;
       }
 
@@ -149,11 +193,13 @@ const Dashboard = ({ navigation }) => {
         plate: bookingPlate,
         duedate: bookingDate,
         hour: bookingHour,
-        park_id: parkId,
-        user: userId
+        park_id: selectedParking.parking_id,
+        user: userId,
+        reserved_hour: reservedHour,
+        amount: amount
       };
 
-      const response = await fetch('http://192.168.1.86:8000/new/park-in', {
+      const response = await fetch('http://10.213.112.130:8000/new/park-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData)
@@ -179,7 +225,7 @@ const Dashboard = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch('http://192.168.1.86:8000/park-in/by-plate', {
+      const response = await fetch('http://10.213.112.130:8000/park-in/by-plate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plate: checkBookingPlate })
@@ -463,7 +509,34 @@ const Dashboard = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, isDarkMode && styles.darkModalContent]}>
             <Text style={[styles.modalTitle, isDarkMode && styles.darkText]}>New Booking</Text>
-            
+
+            {/* Parking Picker */}
+            <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>Select Parking:</Text>
+            {parkingLoading ? (
+              <ActivityIndicator color="#007BFF" />
+            ) : (
+              <ScrollView horizontal style={{ marginBottom: 10 }}>
+                {parkings.map(park => (
+                  <TouchableOpacity
+                    key={park.parking_id}
+                    style={[
+                      styles.dateButton,
+                      selectedParking?.parking_id === park.parking_id && styles.selectedDateButton
+                    ]}
+                    onPress={() => setSelectedParking(park)}
+                  >
+                    <Text style={styles.dateButtonText}>{park.full_park_name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+            {selectedParking && (
+              <Text style={{ color: isDarkMode ? '#aaa' : '#666', marginBottom: 10 }}>
+                {selectedParking.address}
+              </Text>
+            )}
+
+            {/* License Plate */}
             <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>License Plate:</Text>
             <TextInput
               style={[styles.modalInput, isDarkMode && styles.darkModalInput]}
@@ -474,6 +547,7 @@ const Dashboard = ({ navigation }) => {
               autoCapitalize="characters"
             />
 
+            {/* Date Picker */}
             <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>Select Date:</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 15 }}>
               {dateOptions.map(date => (
@@ -501,26 +575,50 @@ const Dashboard = ({ navigation }) => {
               ))}
             </ScrollView>
 
-            <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>Hour:</Text>
+            {/* Entrance Hour Picker */}
+            <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>Entrance Hour:</Text>
             <View style={styles.hourPicker}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.hourButton}
                 onPress={() => setBookingHour(Math.max(0, bookingHour - 1))}
               >
                 <Icon name="minus" size={16} color={isDarkMode ? '#fff' : '#000'} />
               </TouchableOpacity>
-              
               <Text style={[styles.hourText, isDarkMode && styles.darkText]}>
                 {bookingHour}:00
               </Text>
-              
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.hourButton}
                 onPress={() => setBookingHour(Math.min(23, bookingHour + 1))}
               >
                 <Icon name="plus" size={16} color={isDarkMode ? '#fff' : '#000'} />
               </TouchableOpacity>
             </View>
+
+            {/* Reserved Hour Picker */}
+            <Text style={[styles.modalLabel, isDarkMode && styles.darkText]}>Reserved Hour:</Text>
+            <View style={styles.hourPicker}>
+              <TouchableOpacity
+                style={styles.hourButton}
+                onPress={() => setReservedHour(Math.max(1, reservedHour - 1))}
+              >
+                <Icon name="minus" size={16} color={isDarkMode ? '#fff' : '#000'} />
+              </TouchableOpacity>
+              <Text style={[styles.hourText, isDarkMode && styles.darkText]}>
+                {reservedHour} hour{reservedHour > 1 ? 's' : ''}
+              </Text>
+              <TouchableOpacity
+                style={styles.hourButton}
+                onPress={() => setReservedHour(Math.min(24, reservedHour + 1))}
+              >
+                <Icon name="plus" size={16} color={isDarkMode ? '#fff' : '#000'} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Show price for reserved hour */}
+            <Text style={[styles.modalLabel, isDarkMode && styles.darkText, { marginTop: 10 }]}>
+              Plan Price: <Text style={{ color: '#007BFF', fontWeight: 'bold' }}>{amount} RWF</Text>
+            </Text>
 
             {/* Payment Method UI */}
             <Text style={[styles.modalLabel, isDarkMode && styles.darkText, { marginTop: 10 }]}>Payment Method:</Text>
@@ -558,21 +656,7 @@ const Dashboard = ({ navigation }) => {
                 )}
               </TouchableOpacity>
               {/* Visa */}
-              <TouchableOpacity
-                style={[
-                  styles.paymentOption,
-                  { backgroundColor: '#f6f6f6', marginTop: 10 },
-                  selectedPayment === 'Visa' && { borderColor: '#007BFF', borderWidth: 2 }
-                ]}
-                onPress={() => setSelectedPayment('Visa')}
-                activeOpacity={0.7}
-              >
-                <Icon name="credit-card" size={20} color="#007BFF" />
-                <Text style={styles.paymentText}>Visa</Text>
-                {selectedPayment === 'Visa' && (
-                  <Icon name="check" size={18} color="#007BFF" style={{ marginLeft: 8 }} />
-                )}
-              </TouchableOpacity>
+             
             </View>
 
             <View style={styles.modalButtons}>
@@ -585,7 +669,13 @@ const Dashboard = ({ navigation }) => {
               <TouchableOpacity
                 style={[styles.modalButton, styles.confirmButton]}
                 onPress={handleCreateBooking}
-                disabled={!bookingPlate.trim()}
+                disabled={
+                  !bookingPlate.trim() ||
+                  !selectedParking ||
+                  !bookingDate ||
+                  !reservedHour ||
+                  !amount
+                }
               >
                 <Text style={styles.modalButtonText}>Book Now</Text>
               </TouchableOpacity>

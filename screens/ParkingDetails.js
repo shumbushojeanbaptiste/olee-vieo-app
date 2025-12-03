@@ -32,7 +32,7 @@ const ParkingDetails = ({ route, navigation }) => {
   const fetchPrices = async (parkingId) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://192.168.1.86:8000/park_prices/by_plan/${parkingId}`);
+      const response = await fetch(`http://10.213.112.130:8000/park_prices/by_plan/${parkingId}`);
       
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -49,7 +49,7 @@ const ParkingDetails = ({ route, navigation }) => {
   const checkAvailability = async () => {
     try {
       setCheckingAvailability(true);
-      const response = await fetch('http://192.168.1.86:8000/predict/park-available', {
+      const response = await fetch('http://10.213.112.130:8000/predict/park-available', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

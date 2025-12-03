@@ -39,7 +39,7 @@ export default function SignUpScreen({ navigation }) {
     try {
       const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       
-      const response = await fetch('http://192.168.1.86:8000/new/user_accounts', {
+      const response = await fetch('http://10.229.8.130:8000/new/user_accounts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
