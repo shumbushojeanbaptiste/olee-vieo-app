@@ -16,6 +16,7 @@ import HistoryScreen from './screens/HistoryScreen';
 import ZoneRecommendationScreen from './screens/ZoneRecommendationScreen'; // Add this import
 import BookingSuccess from './screens/BookingSuccess';
 import BookingList from './screens/BookingListScreen';
+import TrendsScreen from './screens/TrendsScreen';
 
 
 

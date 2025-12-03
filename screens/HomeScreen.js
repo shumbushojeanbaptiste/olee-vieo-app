@@ -90,13 +90,13 @@ export default function HomeScreen({ navigation }) {
 
       {/* Language Selection Buttons */}
       <View style={styles.languageContainer}>
-        <Text style={styles.languageTitle}>AI-ParkFinder</Text>
+        <Text style={styles.languageTitle}>AI-ParkFinder Video</Text>
         <Text style={styles.languageSubtitle}>
           Easily find, predict, and navigate to available parking spaces
         </Text>
         <TouchableOpacity style={styles.languageButton} onPress={() => navigation.navigate('Login')}>
           <View style={styles.buttonContent}>
-            <Text style={styles.languageButtonText}>Login</Text>
+            <Text style={styles.languageButtonText}>Sign-n</Text>
             <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
           </View>
         </TouchableOpacity>
@@ -105,7 +105,7 @@ export default function HomeScreen({ navigation }) {
   onPress={() => navigation.navigate('Near')}
 >
   <View style={styles.buttonContent}>
-    <Text style={styles.languageButtonText}>Nearest Parking Spot</Text>
+    <Text style={styles.languageButtonText}>Trends Video</Text>
     <Icon name="long-arrow-right" size={16} color="#fff" style={styles.buttonIcon} />
   </View>
 </TouchableOpacity>
