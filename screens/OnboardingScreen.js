@@ -23,34 +23,34 @@ const OnboardingScreen = ({ navigation }) => {
             backgroundColor: '#fff',
             image: (
               <Image
-                source={require('../assets/trackImage.png')} // Replace with your image path
+                source={require('../assets/live.png')} // Replace with your image path
                 style={styles.image}
               />
             ),
-            title: 'Welcome to AI-ParkFinder',
-            subtitle: 'Find, predict, and navigate to available parking spaces with ease.',
+            title: 'Welcome Oleeplay',
+            subtitle: 'Your ultimate video streaming app, anytime, anywhere',
           },
           {
             backgroundColor: '#fff',
             image: (
               <Image
-                source={require('../assets/available.png')} // Replace with your image path
+                source={require('../assets/tv.png')} // Replace with your image path
                 style={styles.image}
               />
             ),
-            title: 'Real-Time Parking Availability',
-            subtitle: 'Get real-time updates on available parking slot',
+            title: 'Latest video Updates',
+            subtitle: 'Get real-time updates on available videos',
           },
           {
             backgroundColor: '#fff',
             image: (
               <Image
-                source={require('../assets/zone.png')} // Replace with your image path
+                source={require('../assets/enounce.png')} // Replace with your image path
                 style={styles.image}
               />
             ),
-            title: 'Zone Recommendation',
-            subtitle: ' Intelligently suggest optimal parking zones for drivers',
+            title: 'Entertaining Videos Anywhere',
+            subtitle: ' Intelligently suggest optimal video zones based on your preferences',
           },
         ]}
       />
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center the button horizontally
   },
   doneButton: {
-    backgroundColor: '#1a237e', // Button background color
+    backgroundColor: '#000', // Button background color
     paddingHorizontal: 40, // Horizontal padding for width
     paddingVertical: 15, // Vertical padding for height
     borderRadius: 30, // Rounded corners

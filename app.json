@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ParkFinder",
-    "slug": "ParkFinder",
+    "name": "MusicFinder",
+    "slug": "musicfinder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,7 +11,7 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
-      "package": "rw.itec.parkfinder",
+      "package": "rw.itec.musicfinder",
       "versionCode": 1
     },
     "owner": "dev-jean",
