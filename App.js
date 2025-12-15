@@ -22,6 +22,7 @@ import VideoPlayer from "./screens/VideoPlayer";
 import VideoPlayerPublic from "./screens/VideoPlayerPublic";
 import config from "./config/config";
 import AuthLoadingScreen from "./screens/AuthLoadingScreen";
+import VerifyEmailScreen from './screens/VerifyEmailScreen';
 
 
 
@@ -104,6 +105,8 @@ export default function App() {
         <Stack.Screen name="ParkingDetails" component={ParkingDetails} />
         <Stack.Screen name="BookingList" component={BookingList} />
 <Stack.Screen name="History" component={HistoryScreen} />
+
+ <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
         {/* <Stack.Screen name="Chat me" component={ChatScreen} /> */}
       
 

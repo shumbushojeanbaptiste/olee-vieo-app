@@ -19,9 +19,56 @@ import {
   fetchMyVideos as initialMyVideos,
   fetchMyVideos,
   fetchTrendingVideos,
+  fetchInternalLatestVideos,
 } from "../src/data/videos";
 import { categories } from "../src/data/category";
 import ProfileDrawer from "../components/ProfileDrawer";
+import { jwtDecode } from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+export const getUserIdFromToken = async () => {
+  const token = await AsyncStorage.getItem('authToken');
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    console.log('Decoded token:', decoded);
+
+    if (decoded?.user_id) {
+      return decoded.user_id;
+    }
+
+    return null;
+  } catch (err) {
+    console.log('Invalid token', err);
+    return null;
+  }
+};
+export const getUserData = async () => {
+  const userData = await AsyncStorage.getItem('userData');
+  if (!userData) return null;
+
+  try {
+    // 🔹 parse the JSON string
+    const parsed = JSON.parse(userData);
+
+    console.log('User info:', parsed);
+
+    if (parsed?.first_name) {
+      return parsed.first_name;
+    }
+
+    return null;
+  } catch (err) {
+    console.log('Failed to parse userData', err);
+    return null;
+  }
+};
+
+
+
+
 
 const { width } = Dimensions.get("window");
 
@@ -34,15 +81,55 @@ export default function DashboardScreen({ navigation }) {
   const [apiMyVideos, setApiMyVideos] = useState([]);
   const [apiLatestVideos, setApiLatestVideos] = useState([]);
 
+  // user data
+const [userId, setUserId] = useState(null);
+const [firstName, setFirstName] = useState(null);
+const [authChecked, setAuthChecked] = useState(false);
+
+
+useEffect(() => {
+  const checkUser = async () => {
+    const id = await getUserIdFromToken();
+
+    if (!id) {
+      Alert.alert('Session expired', 'Please login again');
+      await AsyncStorage.clear();
+      navigation.replace('Login');
+      return;
+    }
+
+    console.log('User ID exists:', id);
+    setUserId(id);          // ✅ save userId
+    setAuthChecked(true);   // ✅ mark auth as checked
+
+    const first_name = await getUserData();
+    setFirstName(first_name);
+  };
+
+  
+
+  checkUser();
+}, []);
+
+// help to return user data
+
+
+
+
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
 
   // Load API functions
   const loadTrending = async () => {
-    const data = await fetchTrendingVideos();
+    const data = await fetchInternalLatestVideos();
     setApiLatestVideos(data);
   };
+  // load my videos
+  const loadMyVideos = async () => {
+    const data = await fetchMyVideos();
+    setApiMyVideos(data) ;
+  }
 
   const loadCategories = async () => {
     const data = await fetchVideosByCategory();
@@ -51,14 +138,15 @@ export default function DashboardScreen({ navigation }) {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadTrending(), loadCategories()]);
+    await Promise.all([loadTrending(), loadCategories(),loadMyVideos()]);
     setRefreshing(false);
   };
+
 
   useEffect(() => {
     loadCategories();
     loadTrending();
-    fetchMyVideos().then(setApiMyVideos);
+    loadMyVideos();
   }, []);
 
   const handleVideoPress = (video) => {
@@ -168,7 +256,13 @@ export default function DashboardScreen({ navigation }) {
         </ScrollView>
 
         {/* MY VIDEOS (Horizontal) */}
-        <Text style={styles.sectionTitle}>My Videos | Purchased Store</Text>
+
+       <Text style={styles.sectionTitle}>
+  {apiMyVideos?.length > 0
+    ? "My Videos | Purchased Store"
+    : ""}
+  
+</Text>
         <FlatList
           data={apiMyVideos}
           renderItem={(item) => renderVideoCard({ ...item, horizontal: true })}
@@ -179,7 +273,7 @@ export default function DashboardScreen({ navigation }) {
         />
 
         {/* TRENDING (Vertical Full-width) */}
-        <Text style={styles.sectionTitle}>Trending Now | Latest This Month</Text>
+        <Text style={styles.sectionTitle}>Trending Now | Latest  </Text>
         <FlatList
           data={apiLatestVideos}
           renderItem={(item) => renderVideoCard({ ...item, horizontal: false })}
@@ -219,7 +313,7 @@ const styles = StyleSheet.create({
   categoryText: { color: "#fff" },
   categoryTextActive: { color: "#000", fontWeight: "bold" },
   sectionTitle: { color: "#fff", fontSize: 25, marginLeft: 15, marginBottom: 10, marginTop: 15 },
-  videoCard: { marginRight: 10, backgroundColor: "#1c1c1c", borderRadius: 15, overflow: "hidden" },
+  videoCard: { marginRight: 10, backgroundColor: "#1c1c1c", borderRadius: 10, overflow: "hidden" },
   videoThumbnail: { width: "100%" },
   videoInfo: { padding: 5 },
   videoTitle: { color: "#fff", fontSize: 14, fontWeight: "600" },

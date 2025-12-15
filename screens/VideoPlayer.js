@@ -17,6 +17,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import config from "../config/config";
 import { relatedVideos,fetchTrendingVideos,fetchStoreVideos } from "../src/data/videos";
+import { getUserData, getUserIdFromToken,userId,firstName } from "../screens/DashboardScreen";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function VideoPlayer({ route, navigation }) {
@@ -62,6 +63,32 @@ export default function VideoPlayer({ route, navigation }) {
   const likeAnim = useRef(new Animated.Value(1)).current;
   const dislikeAnim = useRef(new Animated.Value(1)).current;
 
+
+   // ===== User info =====
+    const [userId, setUserId] = useState(null);
+    const [firstName, setFirstName] = useState(null);
+    const [authChecked, setAuthChecked] = useState(false);
+
+     // ===== Load user info =====
+      useEffect(() => {
+        const checkUser = async () => {
+          const id = await getUserIdFromToken();
+          if (!id) {
+            //Alert.alert("Session expired", "Please login again");
+            await AsyncStorage.clear();
+            navigation.replace("Login");
+            return;
+          }
+          setUserId(id);
+          setAuthChecked(true);
+    
+          const first_name = await getUserData();
+          setFirstName(first_name);
+        };
+        checkUser();
+      }, []);
+    
+
   // Update screen title
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -99,11 +126,16 @@ export default function VideoPlayer({ route, navigation }) {
 
   // API Calls
   const addView = async (video_id) => {
+
+      if (!userId) {
+    console.log(" addView aborted: userId missing");
+    return;
+  }
     try {
       const token = await getToken();
       const device_id = "123456"; // can use device info
       await axios.post(config.PLAY,
-        { user_id: 1, video_id, device_id },
+        { user_id: userId, video_id, device_id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (error) {
@@ -118,11 +150,11 @@ export default function VideoPlayer({ route, navigation }) {
       const token = await getToken();
       const device_id = "123456";
       await axios.post(config.LIKES,
-        { user_id: 1, video_id: currentVideo.id, device_id },
+        { user_id: userId, video_id: currentVideo.id, device_id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (error) {
-      Alert.alert("Error", "Like failed");
+      //Alert.alert("Error", "Like failed");
     } finally {
       setLoadingAction(false);
     }
@@ -135,11 +167,11 @@ export default function VideoPlayer({ route, navigation }) {
       const token = await getToken();
       const device_id = "123456";
       await axios.post(config.DISLIKES,
-        { user_id: 1, video_id: currentVideo.id, device_id },
+        { user_id: userId, video_id: currentVideo.id, device_id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (error) {
-      Alert.alert("Error", "Dislike failed");
+      //Alert.alert("Error", "Dislike failed");
     } finally {
       setLoadingAction(false);
     }
@@ -154,7 +186,7 @@ export default function VideoPlayer({ route, navigation }) {
       const device_id = "123456";
       await axios.post(config.COMMENTS,
         {
-          user_id: 1,
+          user_id: userId,
           video_id: currentVideo.id,
           device_id,
           comment: commentText,
@@ -166,7 +198,7 @@ export default function VideoPlayer({ route, navigation }) {
       setComments([newComment, ...comments]);
       setCommentText("");
     } catch (error) {
-      Alert.alert("Error", "Failed to add comment");
+      //Alert.alert("Error", "Failed to add comment");
     } finally {
       setLoadingAction(false);
     }
@@ -276,8 +308,8 @@ export default function VideoPlayer({ route, navigation }) {
         </View>
 
         <TouchableOpacity style={styles.commentBtn} onPress={() => setShowComments(!showComments)}>
-          <Text style={styles.commentIcon}>💬</Text>
-          <Text style={styles.commentCount}>{comments.length}</Text>
+          <Text style={styles.commentIcon}>💬 </Text>
+          <Text style={styles.commentCount}>{currentVideo.total_comments} </Text>
         </TouchableOpacity>
       </View>
 
@@ -287,7 +319,7 @@ export default function VideoPlayer({ route, navigation }) {
           <View style={styles.commentBox}>
             <TextInput
               style={styles.input}
-              placeholder="Add a comment..."
+              placeholder={`Add a comment...  ${currentVideo.total_comments}`}
               placeholderTextColor="#888"
               value={commentText}
               onChangeText={setCommentText}

@@ -1,12 +1,13 @@
 // config.js
-const BASE_URL = "http://192.168.0.100:5000/api"; // Base API URL
+const BASE_URL = "http://192.168.1.104:5000/api"; // Base API URL
 
 export default {
   BASE_URL,
 
   // -------- AUTH --------
   LOGIN: `${BASE_URL}/accounts/login`,
-  REGISTER: `${BASE_URL}/accounts/register`,
+  REGISTER: `${BASE_URL}/accounts/new_account`,
+  VERIFY_EMAIL: `${BASE_URL}/accounts/verify-email`,
   LOGOUT: `${BASE_URL}/accounts/logout`,
 
   // -------- VIDEO ENDPOINTS --------
@@ -24,6 +25,7 @@ export default {
 
   // -------- CATEGORIES / METADATA --------
   CATEGORIES: `${BASE_URL}/categories`,
+  PAYMENT_METHODS: `${BASE_URL}/settings/paymentMethods`,
 
   // -------- PLAYBACK & INTERACTIONS --------
   PLAY: `${BASE_URL}/watching/play`,
@@ -32,7 +34,8 @@ export default {
   COMMENTS: `${BASE_URL}/watching/comments`,
 
   // -------- USER VIDEOS --------
-  MY_VIDEOS: `${BASE_URL}/videos/trends`,
+  MY_VIDEOS: `${BASE_URL}/accessible/purchased-videos`,
+  INTERNAL_LATEST: `${BASE_URL}/accessible/latest-video`,
 
   // -------- FUTURE ENDPOINTS --------
   // Add any new endpoints here as needed

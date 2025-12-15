@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import config from "../config/config";
 import api from "../src/utils/api";
 
@@ -33,29 +33,38 @@ export default function LoginScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
-  const validateToken = async () => {
-    try {
-      setCheckingToken(true);
-      const token = await AsyncStorage.getItem("authToken");
+ const validateToken = async () => {
+  try {
+    setCheckingToken(true);
 
-      if (token) {
-        const decoded = jwtDecode(token);
-        const now = Math.floor(Date.now() / 1000);
-
-        if (decoded.exp && decoded.exp > now) {
-          navigation.replace("Dashboard");
-          return;
-        } else {
-          await AsyncStorage.clear();
-        }
-      }
-    } catch (err) {
-      console.log("Token check failed:", err.message);
-      await AsyncStorage.clear();
-    } finally {
+    const token = await AsyncStorage.getItem('authToken');
+    if (!token) {
       setCheckingToken(false);
+      return;
     }
-  };
+
+    const decoded = jwtDecode(token); // decode token to get payload
+    const now = Math.floor(Date.now() / 1000); // current time in seconds
+
+    // ✅ CHECK user_id EXISTS
+    if (!decoded?.user_id) {
+      throw new Error('User ID missing in token');
+    }
+
+    // ✅ CHECK TOKEN EXPIRY
+    if (decoded.exp && decoded.exp > now) {
+      navigation.replace('Dashboard');
+      return;
+    }
+
+    await AsyncStorage.clear();
+  } catch (err) {
+    console.log('Token check failed:', err.message);
+    await AsyncStorage.clear();
+  } finally {
+    setCheckingToken(false);
+  }
+};
 
   // ==========================================
   // HANDLE LOGIN
@@ -74,7 +83,7 @@ export default function LoginScreen({ navigation }) {
 
       if (data.success) {
         await AsyncStorage.setItem("authToken", data.data.jwt);
-        await AsyncStorage.setItem("userId", data.data.user_id.toString());
+        //await AsyncStorage.setItem("userId", data.data.user_id.toString());
         await AsyncStorage.setItem("userData", JSON.stringify(data.data));
 
         setIsSuccess(true);

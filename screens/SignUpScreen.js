@@ -1,158 +1,112 @@
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
+  Alert,
+  StyleSheet,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
+import config from "../config/config";
 
 export default function SignUpScreen({ navigation }) {
-  const [familyName, setFamilyName] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (!familyName || !firstName || !email || !phone) {
-      Alert.alert('Validation Failed', 'Please fill in all required fields');
+    if (!firstName || !lastName || !email) {
+      Alert.alert('Error', 'All fields are required');
       return;
     }
 
-    if (!/^\d{10}$/.test(phone)) {
-      Alert.alert('Validation Failed', 'Phone number must be 10 digits');
-      return;
-    }
-
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      Alert.alert('Validation Failed', 'Please enter a valid email address');
-      return;
-    }
-
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      
-      const response = await fetch('http://10.229.8.130:8000/new/user_accounts', {
+      const res = await fetch(config.REGISTER, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          family_name: familyName,
           first_name: firstName,
-          email: email,
-          role_id: 3, // Default role for new users
-          user_park: 0, // Default value
-          reg_date: currentDate,
-          account_name: phone, // Using phone as account name
-          us_phone: phone,
-          gender: null, // Can be updated later
-          last_logged_in: null,
-          last_logged_out: null,
-          log_sts: "0"
-        })
+          last_name: lastName,
+          email,
+          google_id: null,
+          profile_photo: '/upload/default.png',
+        }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (response.ok) {
-        Toast.show({
-          type: 'success',
-          text1: 'Account Created',
-          text2: data.message,
-        });
-        setTimeout(() => {
-          navigation.navigate('Login');
-        }, 1500);
-      } else {
-        throw new Error(data.message || 'Account creation failed');
+      if (!data.success) {
+        throw new Error(data.message);
       }
-    } catch (error) {
+
+      Toast.show({
+        type: 'success',
+        text1: 'Check your email',
+        text2: 'Verification code sent',
+      });
+
+      navigation.navigate('VerifyEmail', { email });
+
+    } catch (err) {
       Toast.show({
         type: 'error',
-        text1: 'Sign Up Failed',
-        text2: error.message,
+        text1: 'Sign up failed',
+        text2: err.message,
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Sign Up Form */}
       <Text style={styles.title}>Create Account</Text>
 
-      {/* Family Name Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Family Name"
-        value={familyName}
-        onChangeText={setFamilyName}
-      />
-
-      {/* First Name Input */}
       <TextInput
         style={styles.input}
         placeholder="First Name"
-        value={firstName}
         onChangeText={setFirstName}
+        value={firstName}
       />
 
-      {/* Email Input */}
       <TextInput
         style={styles.input}
-        placeholder="Email Address"
-        value={email}
-        onChangeText={setEmail}
+        placeholder="Last Name"
+        onChangeText={setLastName}
+        value={lastName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
+        onChangeText={setEmail}
+        value={email}
       />
 
-      {/* Phone Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number (10 digits)"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        maxLength={10}
-      />
-
-      {/* Sign Up Button */}
       <TouchableOpacity
-        style={[styles.signUpButton, isLoading && styles.disabledButton]}
         onPress={handleSignUp}
-        disabled={isLoading}
+        disabled={loading}
+        style={[styles.signUpButton, loading && styles.disabledButton]}
       >
-        {isLoading ? (
+        {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <View style={styles.buttonContent}>
-            <Text style={styles.signUpButtonText}>Create Account</Text>
-            <Icon name="user-plus" size={16} color="#fff" style={styles.buttonIcon} />
-          </View>
+          <Text style={styles.signUpButtonText}>Create Account</Text>
         )}
-      </TouchableOpacity>
-
-      {/* Already have an account? Login Link */}
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.loginLink}>
-          Already have an account? <Text style={styles.loginLinkBold}>Login</Text>
-        </Text>
       </TouchableOpacity>
 
       <Toast />
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

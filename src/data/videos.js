@@ -1,9 +1,15 @@
 
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import config from "../../config/config";
 
-const userId = 1; // Example user ID
+import config from "../../config/config";
+import { jwtDecode } from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserData, getUserIdFromToken,userId,firstName } from "../../screens/DashboardScreen";
+
+
+
+
+
 
 export const fetchPurchasedVideos = async (userId) => {
   try {
@@ -194,14 +200,17 @@ export const fetchRelatedVideos = async () => {
 // related Store video from API
 export const fetchMyVideos = async () => {
   try {
-    console.log("Fetching trending videos...");
-    const res = await axios.get(config.MY_VIDEOS);
+    const token = await AsyncStorage.getItem("authToken");
 
-    console.log("Response:", res.data);
+    const res = await axios.get(config.MY_VIDEOS, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!res.data.success) return [];
 
-    const videos = res.data.data.map(v => ({
+    return res.data.data.map(v => ({
       id: v.id.toString(),
       title: v.title,
       thumbnail: v.thumbnail,
@@ -215,8 +224,39 @@ export const fetchMyVideos = async () => {
       owner: v.owner || "",
       comments: v.comments || [],
     }));
+  } catch (err) {
+    console.log("Fetch failed:", err.message);
+    return [];
+  }
+};
 
-    return videos;
+// internal latest store
+export const fetchInternalLatestVideos = async () => {
+  try {
+    const token = await AsyncStorage.getItem("authToken");
+
+    const res = await axios.get(config.INTERNAL_LATEST, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.data.success) return [];
+
+    return res.data.data.map(v => ({
+      id: v.id.toString(),
+      title: v.title,
+      thumbnail: v.thumbnail,
+      video_url: v.video_url,
+      views: v.views,
+      likes: v.likes,
+      dislikes: v.dislikes || 0,
+      duration: v.duration || "09:56",
+      prices: v.price,
+      category: v.category,
+      owner: v.owner || "",
+      comments: v.comments || [],
+    }));
   } catch (err) {
     console.log("Fetch failed:", err.message);
     return [];
@@ -225,15 +265,18 @@ export const fetchMyVideos = async () => {
 
 // related my video from API
 export const fetchStoreVideos = async () => {
-  try {
-    console.log("Fetching store videos...");
-    const res = await axios.get(config.STORE_VIDEOS);
+   try {
+    const token = await AsyncStorage.getItem("authToken");
 
-    console.log("Response:", res.data);
+    const res = await axios.get(config.MY_VIDEOS, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!res.data.success) return [];
 
-    const videos = res.data.data.map(v => ({
+    return res.data.data.map(v => ({
       id: v.id.toString(),
       title: v.title,
       thumbnail: v.thumbnail,
@@ -247,8 +290,6 @@ export const fetchStoreVideos = async () => {
       owner: v.owner || "",
       comments: v.comments || [],
     }));
-
-    return videos;
   } catch (err) {
     console.log("Fetch failed:", err.message);
     return [];
