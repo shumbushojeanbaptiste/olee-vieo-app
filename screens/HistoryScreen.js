@@ -79,7 +79,7 @@ const HistoryScreen = () => {
       <Text style={styles.title}>Parking History</Text>
       <FlatList
         data={parkingHistory}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
         renderItem={renderHistoryItem}
         contentContainerStyle={styles.listContainer}
       />

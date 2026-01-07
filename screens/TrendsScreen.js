@@ -6,18 +6,60 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Image
+  Image,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import ProfileDrawer from "../components/ProfileDrawer";
+import { fetchMyVideos } from "../src/data/videos";
 
 export const TrendsScreen = ({ navigation }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Purchased videos and buy drawer
+  const [apiMyVideos, setApiMyVideos] = useState([]);
+  const [videoToBuy, setVideoToBuy] = useState(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
   useEffect(() => {
     loadVideos();
+    loadMyVideos();
   }, []);
+
+  const loadMyVideos = async () => {
+    try {
+      const data = await fetchMyVideos();
+      setApiMyVideos(data || []);
+    } catch (err) {
+      console.log("Load my videos failed:", err?.message || err);
+    }
+  };
+
+  const isOwned = (video) => apiMyVideos.some((v) => v.id === String(video.id));
+
+  const handleVideoPress = (video) => {
+    if (isOwned(video)) {
+      return navigation.navigate("VideoPlayer", { video });
+    }
+
+    Alert.alert(
+      "Purchase Video",
+      `Do you want to buy "${video.title}" for ${video.prices} RWF?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Buy", onPress: () => { setVideoToBuy(video); setDrawerVisible(true); } },
+      ]
+    );
+  };
+
+  const handlePurchaseSuccess = (video) => {
+    // Add to local purchased list so UI updates immediately
+    setApiMyVideos((prev) => [video, ...prev]);
+    setVideoToBuy(null);
+    setDrawerVisible(false);
+  };
 
   const loadVideos = async () => {
     try {
@@ -32,7 +74,8 @@ export const TrendsScreen = ({ navigation }) => {
           views: 120000,
           likes: 3500,
           duration: "12:45",
-          video_url: "https://www.w3schools.com/html/mov_bbb.mp4"
+          video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
+          prices: 100,
         },
         {
           id: 2,
@@ -42,7 +85,8 @@ export const TrendsScreen = ({ navigation }) => {
           likes: 2100,
           duration: "8:20",
           video_url:
-            "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+          prices: 100,
         },
         {
           id: 3,
@@ -52,7 +96,8 @@ export const TrendsScreen = ({ navigation }) => {
           likes: 6000,
           duration: "10:00",
           video_url:
-            "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+          prices: 100,
         }
       ];
 
@@ -104,9 +149,7 @@ export const TrendsScreen = ({ navigation }) => {
           <TouchableOpacity
             key={video.id}
             style={[styles.card, isDarkMode && styles.darkCard]}
-            onPress={() =>
-              navigation.navigate("VideoPlayer", { video: video })
-            }
+            onPress={() => handleVideoPress(video)}
           >
             <Image source={{ uri: video.thumbnail }} style={styles.thumbnail} />
 
@@ -125,15 +168,30 @@ export const TrendsScreen = ({ navigation }) => {
                   {video.likes.toLocaleString()}
                 </Text>
               </View>
+
+              {!isOwned(video) && (
+                <Text style={[styles.purchaseLabel, isDarkMode && styles.darkText]}>
+                  {video.prices} RWF
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
-        ))}
+        ))} 
       </ScrollView>
+
+      <ProfileDrawer
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        videoToBuy={videoToBuy}
+        onPurchaseSuccess={handlePurchaseSuccess}
+      />
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  purchaseLabel: { color: "#cb880a", fontSize: 14, marginTop: 8, fontWeight: "bold" },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5"

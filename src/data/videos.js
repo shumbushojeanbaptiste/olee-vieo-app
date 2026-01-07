@@ -263,6 +263,37 @@ export const fetchInternalLatestVideos = async () => {
   }
 };
 
+// Search videos by query
+export const fetchVideosBySearch = async (query) => {
+  try {
+    if (!query) return [];
+
+    const res = await axios.get(config.SEARCH_VIDEO, {
+      params: { q: query },
+    });
+
+    if (!res.data.success) return [];
+
+    return res.data.data.map(v => ({
+      id: v.id.toString(),
+      title: v.title,
+      thumbnail: v.thumbnail,
+      video_url: v.video_url,
+      views: v.views,
+      likes: v.likes,
+      dislikes: v.dislikes || 0,
+      duration: v.duration || '09:56',
+      prices: v.price,
+      category: v.category,
+      owner: v.owner || '',
+      comments: v.comments || [],
+    }));
+  } catch (err) {
+    console.log("Search fetch failed:", err.message);
+    return [];
+  }
+};
+
 // related my video from API
 export const fetchStoreVideos = async () => {
    try {
@@ -295,9 +326,68 @@ export const fetchStoreVideos = async () => {
     return [];
   }
 };
-export const relatedVideos = [];
-  export const myVideos = [];
+// search video from API
+export const fetchStoreSearchVideos = async (query) => {
+   try {
+    if (!query) return [];
+    const token = await AsyncStorage.getItem("authToken");
 
+    const res = await axios.get(config.SEARCH_VIDEO, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: { q: query },
+    });
 
+    if (!res.data.success) return [];
 
+    return res.data.data.map(v => ({
+      id: v.id.toString(),
+      title: v.title,
+      thumbnail: v.thumbnail,
+      video_url: v.video_url,
+      views: v.views,
+      likes: v.likes,
+      dislikes: v.dislikes || 0,
+      duration: v.duration || "09:56",
+      prices: v.price,
+      category: v.category,
+      owner: v.owner || "",
+      comments: v.comments || [],
+    }));
+  } catch (err) {
+    console.log("Search fetch failed:", err.message);
+    return [];
+  }
+};
 
+export const fetchCategoricalVideos = async () => {
+  try {
+    console.log("Fetching trending videos...");
+    const res = await axios.get(config.BY_CATEGORY);
+
+    console.log("Response:", res.data);
+
+    if (!res.data.success) return [];
+
+    const videos = res.data.data.map(v => ({
+      id: v.id.toString(),
+      title: v.title,
+      thumbnail: v.thumbnail,
+      video_url: v.video_url,
+      views: v.views,
+      likes: v.likes,
+      dislikes: v.dislikes || 0,
+      duration: v.duration || "09:56",
+      prices: v.price,
+      category: v.category,
+      owner: v.owner || "",
+      comments: v.comments || [],
+    }));
+
+    return videos;
+  } catch (err) {
+    console.log("Fetch failed:", err.message);
+    return [];
+  }
+};

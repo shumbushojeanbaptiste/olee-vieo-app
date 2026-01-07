@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { StatusBar, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import OpeningScreen from './screens/OpeningScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -23,6 +24,8 @@ import VideoPlayerPublic from "./screens/VideoPlayerPublic";
 import config from "./config/config";
 import AuthLoadingScreen from "./screens/AuthLoadingScreen";
 import VerifyEmailScreen from './screens/VerifyEmailScreen';
+import Search from './screens/SearchScreen';
+import MyVideoScreen from './screens/MyVideoScreen';
 
 
 
@@ -34,17 +37,39 @@ import VerifyEmailScreen from './screens/VerifyEmailScreen';
 
 
 import { Image } from 'react-native';
-
-
+import NetInfo from '@react-native-community/netinfo';
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  // Monitor network connectivity and alert when offline
+  const prevConnectedRef = React.useRef(true);
+
+  React.useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const connected = !!(state.isConnected && (state.isInternetReachable ?? true));
+      if (prevConnectedRef.current && !connected) {
+        Toast.show({ type: 'error', text1: 'No internet connection', text2: 'Please check your network connection and try again.' });
+      }
+      prevConnectedRef.current = connected;
+    });
+
+    NetInfo.fetch().then(state => {
+      const connected = !!(state.isConnected && (state.isInternetReachable ?? true));
+      prevConnectedRef.current = connected;
+      if (!connected) {
+        Toast.show({ type: 'error', text1: 'No internet connection', text2: 'Please check your network connection and try again.' });
+      }
+    }).catch(() => {});
+
+    return unsubscribe;
+  }, []);
+
   return (
     <>
       {/* Set StatusBar background color and text color */}
       <StatusBar
-        backgroundColor="#1a1a1a" // Light gray background
+        backgroundColor="#000" // Light gray background
         barStyle="light-content" // Dark text/icons
       />
 
@@ -78,7 +103,7 @@ export default function App() {
   component={VideoPlayer}
   options={({ route }) => ({
     title: route.params.video.title, // dynamically set the video title
-    headerStyle: { backgroundColor: '#1a1a1a' },
+    headerStyle: { backgroundColor: '#000' },
     headerTintColor: '#fff',
   })}
 />
@@ -87,7 +112,7 @@ export default function App() {
   component={ VideoPlayerPublic }
   options={({ route }) => ({
     title: route.params.video.title, // dynamically set the video title
-    headerStyle: { backgroundColor: '#1a1a1a' },
+    headerStyle: { backgroundColor: '#000' },
     headerTintColor: '#fff',
   })}
 />
@@ -114,12 +139,20 @@ export default function App() {
           <Stack.Screen
             name="Login"
             component={LoginScreen}
-            options={{
-            
+              options={{
+              title: 'Sign-in',
+              headerRight: () => (
+                <View style={{ marginRight: 15 }}>
+                  <Image
+                    source={require('./assets/logo.png')}
+                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                  />
+                </View>
+              ),
               headerStyle: {
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#000',
               },
-              headerTintColor: 'lightgray',
+              headerTintColor: '#fff',
             }}
           />
 
@@ -138,7 +171,7 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#000',
               },
               headerTintColor: '#fff',
             }}
@@ -152,6 +185,8 @@ export default function App() {
     headerShown: false,  // removes the header completely
   }}
 /> 
+
+
 
             {/* Add ChatScreen to the navigation stack */}
             <Stack.Screen
@@ -189,7 +224,51 @@ export default function App() {
                 </View>
               ),
               headerStyle: {
+                backgroundColor: '#000',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+
+             {/* search Screen */}
+          <Stack.Screen
+            name="Search"
+            component={Search}
+            options={{
+              title: 'Search video',
+              headerRight: () => (
+                <View style={{ marginRight: 15 }}>
+                  <Image
+                    source={require('./assets/logo.png')}
+                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                  />
+                </View>
+              ),
+              headerStyle: {
                 backgroundColor: '#1a1a1a',
+              },
+              headerTintColor: '#fff',
+            }}
+          />
+
+          
+          
+             {/* search Screen */}
+          <Stack.Screen
+            name="MyVideo"
+            component={MyVideoScreen}
+            options={{
+              title: 'My Video',
+              headerRight: () => (
+                <View style={{ marginRight: 15 }}>
+                  <Image
+                    source={require('./assets/logo.png')}
+                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                  />
+                </View>
+              ),
+              headerStyle: {
+                backgroundColor: '#000',
               },
               headerTintColor: '#fff',
             }}
@@ -198,6 +277,7 @@ export default function App() {
 
         
       </NavigationContainer>
+      <Toast />
     </>
   );
 }

@@ -47,7 +47,7 @@ const App = () => {
       <FlatList
         data={tasks}
         renderItem={renderTask}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
         style={styles.taskList}
       />
     </View>

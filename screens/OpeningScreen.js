@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F5F5', // Light gray background (matches StatusBar)
+    backgroundColor: '#000', // Light gray background (matches StatusBar)
   },
   logo: {
     width: 200, // Adjust width as needed

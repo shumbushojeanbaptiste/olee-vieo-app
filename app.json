@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "MusicFinder",
-    "slug": "musicfinder",
-    "version": "1.0.0",
+    "name": "Olee Play",
+    "slug": "olee-play-app",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -14,10 +14,16 @@
       "package": "rw.itec.musicfinder",
       "versionCode": 1
     },
-    "owner": "dev-jean",
+    "owner": "olee-play",
     "extra": {
       "eas": {
-        "projectId": "9d7168da-0a35-414f-9fc5-473aca5cbe82"
+        "projectId": "50f8b8f4-d55b-4afd-9cce-ffc048933cba"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "rw.itec.musicfinder",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     }
   }

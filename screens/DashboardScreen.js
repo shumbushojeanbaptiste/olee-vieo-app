@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,6 +11,7 @@ import {
   FlatList,
   Alert,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import {
@@ -20,6 +21,7 @@ import {
   fetchMyVideos,
   fetchTrendingVideos,
   fetchInternalLatestVideos,
+  fetchCaregoricalVideos,
 } from "../src/data/videos";
 import { categories } from "../src/data/category";
 import ProfileDrawer from "../components/ProfileDrawer";
@@ -72,7 +74,9 @@ export const getUserData = async () => {
 
 const { width } = Dimensions.get("window");
 
-export default function DashboardScreen({ navigation }) {
+export default function DashboardScreen({ navigation, route }) {
+  const scrollRef = useRef(null);
+  const [myVideosY, setMyVideosY] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [myVideos, setMyVideos] = useState(initialMyVideos);
@@ -119,6 +123,7 @@ useEffect(() => {
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // Load API functions
   const loadTrending = async () => {
@@ -144,10 +149,26 @@ useEffect(() => {
 
 
   useEffect(() => {
-    loadCategories();
-    loadTrending();
-    loadMyVideos();
+    const loadAll = async () => {
+      setLoading(true);
+      await Promise.all([loadCategories(), loadTrending(), loadMyVideos()]);
+      setLoading(false);
+    };
+
+    loadAll();
   }, []);
+
+  // If navigated with focusMyVideos param, scroll to the My Videos section
+  useEffect(() => {
+    if (route?.params?.focusMyVideos) {
+      setTimeout(() => {
+        if (scrollRef.current && myVideosY) {
+          scrollRef.current.scrollTo({ y: myVideosY - 10, animated: true });
+        }
+        navigation.setParams({ focusMyVideos: false });
+      }, 300);
+    }
+  }, [route?.params?.focusMyVideos, myVideosY]);
 
   const handleVideoPress = (video) => {
     const owned = apiMyVideos.find((v) => v.id === video.id);
@@ -209,6 +230,7 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <ScrollView
+        ref={scrollRef}
         style={{ flex: 1 }}
         onScroll={(e) => setIsAtTop(e.nativeEvent.contentOffset.y <= 0)}
         scrollEventThrottle={16}
@@ -218,71 +240,93 @@ useEffect(() => {
       >
         {/* HEADER */}
         <View style={styles.headerRow}>
-          <TextInput
-            placeholder="Search..."
-            placeholderTextColor="#888"
-            style={styles.searchInput}
-          />
+           <Image
+                  source={require('../assets/logo.png')}
+                    style={{ width: 100, height: 30, resizeMode: 'contain' }}
+                                        />
+         
           <TouchableOpacity style={styles.profileBtn} onPress={() => setDrawerVisible(true)}>
             <Icon name="user-circle" size={35} color="#fff" />
           </TouchableOpacity>
         </View>
 
-        {/* CATEGORIES */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryScroll}
-        >
-          {apiCategories.map((cat) => (
-            <TouchableOpacity
-              key={cat.category_id}
-              onPress={() => setSelectedCategory(cat.category_name)}
-              style={[
-                styles.categoryButton,
-                selectedCategory === cat.category_name && styles.categoryButtonActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.categoryText,
-                  selectedCategory === cat.category_name && styles.categoryTextActive,
-                ]}
-              >
-                {cat.category_name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+       {/* CATEGORIES */}
+<ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  style={styles.categoryScroll}
+>
+  {apiCategories.map((cat, index) => (
+    <TouchableOpacity
+      key={`category-${cat.category_id ?? 'unknown'}-${index}`}
+      onPress={() => setSelectedCategory(cat.category_name)}
+      style={[
+        styles.categoryButton,
+        selectedCategory === cat.category_name && styles.categoryButtonActive,
+      ]}
+    >
+      <Text
+        style={[
+          styles.categoryText,
+          selectedCategory === cat.category_name && styles.categoryTextActive,
+        ]}
+      >
+        {cat.category_name}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+
 
         {/* MY VIDEOS (Horizontal) */}
-
-       <Text style={styles.sectionTitle}>
-  {apiMyVideos?.length > 0
-    ? "My Videos | Purchased Store"
-    : ""}
-  
-</Text>
-        <FlatList
-          data={apiMyVideos}
-          renderItem={(item) => renderVideoCard({ ...item, horizontal: true })}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingLeft: 10, paddingRight: 10, paddingBottom: 20 }}
-        />
+        <View onLayout={(e) => setMyVideosY(e.nativeEvent.layout.y)}>
+          <Text style={styles.sectionTitle}>
+            {apiMyVideos?.length > 0 ? "My Videos List " : ""}
+          </Text>
+          <FlatList
+            data={apiMyVideos}
+            renderItem={(item) => renderVideoCard({ ...item, horizontal: true })}
+            keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingLeft: 10, paddingRight: 10, paddingBottom: 20 }}
+          />
+        </View>
 
         {/* TRENDING (Vertical Full-width) */}
-        <Text style={styles.sectionTitle}>Trending Now | Latest  </Text>
+        <Text style={styles.sectionTitle}>Trending Now | Latest   </Text>
         <FlatList
           data={apiLatestVideos}
           renderItem={(item) => renderVideoCard({ ...item, horizontal: false })}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
           scrollEnabled={false} // ScrollView handles scrolling
           nestedScrollEnabled
           contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 30 }}
         />
       </ScrollView>
+
+      {/* Bottom navigation menu */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Dashboard')}>
+          <Icon name="home" size={24} color="#cb880aff" />
+          <Text style={styles.navLabel}> </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Profile')}>
+          <Icon name="user" size={24} color="#cb880aff" />
+          <Text style={styles.navLabel}> </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('MyVideo')}>
+          <Icon name="film" size={24} color="#cb880aff" />
+          <Text style={styles.navLabel}> </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Search') }>
+          <Icon name="search" size={24} color="#cb880aff" />
+          <Text style={styles.navLabel}> </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* PROFILE / WALLET DRAWER */}
       <ProfileDrawer
@@ -291,12 +335,39 @@ useEffect(() => {
         videoToBuy={videoToBuy}
         onPurchaseSuccess={handlePurchaseSuccess}
       />
+
+      {/* Centered loading / refreshing overlay */}
+      {(loading || refreshing) && (
+        <View style={styles.loadingOverlay} pointerEvents="none">
+          <ActivityIndicator size="large" color="#cb880aff" />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: "#000", paddingBottom: 80 },
+  bottomNav: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginHorizontal: 10,
+    backgroundColor: '#000',
+    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  navButton: { alignItems: 'center', justifyContent: 'center' },
+  navLabel: { color: '#fff', fontSize: 12, marginTop: 4 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", margin: 15 },
   searchInput: {
     flex: 1,
@@ -321,4 +392,15 @@ const styles = StyleSheet.create({
   videoViews: { color: "#bbb", fontSize: 12 },
   videoDuration: { color: "#bbb", fontSize: 12 },
   purchaseLabel: { color: "#cb880a", fontSize: 12, marginTop: 5, fontWeight: "bold" },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 999,
+  },
 });

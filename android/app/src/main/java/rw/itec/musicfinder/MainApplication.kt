@@ -1,4 +1,4 @@
-package rw.itec.myapp
+package rw.itec.musicfinder
 
 import android.app.Application
 import android.content.res.Configuration

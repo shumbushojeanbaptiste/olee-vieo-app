@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { getUserData, getUserIdFromToken } from "../screens/DashboardScreen";
 
-export default function ProfileDrawer({ visible, onClose, videoToBuy, onBalanceUpdate }) {
+export default function ProfileDrawer({ visible, onClose, videoToBuy, onBalanceUpdate, onPurchaseSuccess }) {
   const navigation = useNavigation();
 
   // ===== User info =====
@@ -172,6 +172,14 @@ export default function ProfileDrawer({ visible, onClose, videoToBuy, onBalanceU
       });
       setMessage(`Purchased: ${videoToBuy.title} (${videoToBuy.prices} RWF)`);
       await fetchBalance();
+
+      // Notify parent that purchase succeeded so UI can update immediately
+      try {
+        onPurchaseSuccess?.(videoToBuy);
+      } catch (notifyErr) {
+        console.log('onPurchaseSuccess callback failed:', notifyErr?.message || notifyErr);
+      }
+
       setTimeout(onClose, 1500);
     } catch (err) {
       setMessage(err?.response?.data?.message || "Purchase failed");
@@ -312,7 +320,7 @@ export default function ProfileDrawer({ visible, onClose, videoToBuy, onBalanceU
             <TouchableOpacity style={styles.logoutBtn} onPress={logout} disabled={processing || fetchingBalance}>
               <View style={styles.logoutContent}>
                 <Icon name="sign-out" size={18} color="#ff8800" style={{ marginRight: 8 }} />
-                <Text style={styles.logoutText}>{processing ? "Logging out..." : "Logout"}</Text>
+                <Text style={styles.logoutText}>{processing ? "Processing..." : "Logout"}</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -331,7 +339,7 @@ export default function ProfileDrawer({ visible, onClose, videoToBuy, onBalanceU
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" },
-  drawer: { backgroundColor: "#1a1a1a", padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  drawer: { backgroundColor: "#000", padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   closeBtn: { alignSelf: "flex-end" },
   title: { color: "#fff", fontSize: 22, marginVertical: 10, fontWeight: "bold" },
   balanceTxt: { color: "#fff", fontSize: 18, marginVertical: 10 },

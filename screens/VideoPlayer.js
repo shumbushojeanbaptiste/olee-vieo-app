@@ -9,16 +9,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
-  Alert,
 } from "react-native";
 import { Video } from "expo-av";
-import { WebView } from "react-native-webview";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import config from "../config/config";
-import { relatedVideos,fetchTrendingVideos,fetchStoreVideos } from "../src/data/videos";
-import { getUserData, getUserIdFromToken,userId,firstName } from "../screens/DashboardScreen";
-import Icon from "react-native-vector-icons/FontAwesome";
+import { fetchStoreVideos } from "../src/data/videos";
+import { getUserData, getUserIdFromToken } from "../screens/DashboardScreen";
 
 export default function VideoPlayer({ route, navigation }) {
   const { video } = route.params;
@@ -28,92 +25,65 @@ export default function VideoPlayer({ route, navigation }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
 
-  //Trending video
-      const [apitrendsVideos, setTrendsVideos] = useState([]);
-      
-        // Load API Related Videos
-        useEffect(() => {
-          const load = async () => {
-            const data = await fetchTrendingVideos();
-            setTrendsVideos(data);
-          };
-          load();
-        }, []);
-
-        //related video states
-     const [apiRelatedVideos, setRelatedVideos] = useState([]);
-        // Load API Related Videos
-        useEffect(() => {
-          const load = async () => {
-            const data = await fetchStoreVideos();
-            setRelatedVideos(data);
-          };
-          load();
-        }, []);
-
+  const [apiRelatedVideos, setRelatedVideos] = useState([]);
   const [likes, setLikes] = useState(video.likes);
   const [dislikes, setDislikes] = useState(video.dislikes);
   const [comments, setComments] = useState(video.comments);
-  const [likedStatus, setLikedStatus] = useState(null); // null, 'like', 'dislike'
+  const [likedStatus, setLikedStatus] = useState(null);
 
   const [loadingVideo, setLoadingVideo] = useState(true);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [selectedQuality, setSelectedQuality] = useState("720p");
 
   const likeAnim = useRef(new Animated.Value(1)).current;
   const dislikeAnim = useRef(new Animated.Value(1)).current;
 
+  const [userId, setUserId] = useState(null);
+  const [firstName, setFirstName] = useState(null);
 
-   // ===== User info =====
-    const [userId, setUserId] = useState(null);
-    const [firstName, setFirstName] = useState(null);
-    const [authChecked, setAuthChecked] = useState(false);
+  /* ------------------ LOAD USER ------------------ */
+  useEffect(() => {
+    const checkUser = async () => {
+      const id = await getUserIdFromToken();
+      if (!id) {
+        await AsyncStorage.clear();
+        navigation.replace("Login");
+        return;
+      }
+      setUserId(id);
 
-     // ===== Load user info =====
-      useEffect(() => {
-        const checkUser = async () => {
-          const id = await getUserIdFromToken();
-          if (!id) {
-            //Alert.alert("Session expired", "Please login again");
-            await AsyncStorage.clear();
-            navigation.replace("Login");
-            return;
-          }
-          setUserId(id);
-          setAuthChecked(true);
-    
-          const first_name = await getUserData();
-          setFirstName(first_name);
-        };
-        checkUser();
-      }, []);
-    
+      const first_name = await getUserData();
+      setFirstName(first_name);
+    };
+    checkUser();
+  }, []);
 
-  // Update screen title
+  /* ------------------ LOAD RELATED VIDEOS ------------------ */
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchStoreVideos();
+      setRelatedVideos(data);
+    };
+    load();
+  }, []);
+
+  /* ------------------ HEADER ------------------ */
   useLayoutEffect(() => {
     navigation.setOptions({
       title: currentVideo.title,
-      headerStyle: { backgroundColor: "#1a1a1a" },
+      headerStyle: { backgroundColor: "#000" },
       headerTintColor: "#fff",
     });
   }, [navigation, currentVideo]);
 
-  // Check if URL is YouTube
-  const isYouTube = (url) =>
-    url.includes("youtube.com") || url.includes("youtu.be");
-
-  // Get token from AsyncStorage
+  /* ------------------ VIDEO HANDLERS ------------------ */
   const getToken = async () => await AsyncStorage.getItem("authToken");
 
-  // Handle video loading state
   const handleLoadStart = () => setLoadingVideo(true);
   const handleLoadEnd = () => setLoadingVideo(false);
 
-  // Load new video
   const loadNewVideo = async (item) => {
-    if (videoRef.current && !isYouTube(item.video_url)) {
-      await videoRef.current.stopAsync();
-    }
+    if (videoRef.current) await videoRef.current.stopAsync();
+
     setCurrentVideo(item);
     setLikes(item.likes);
     setDislikes(item.dislikes);
@@ -121,21 +91,16 @@ export default function VideoPlayer({ route, navigation }) {
     setLikedStatus(null);
     setLoadingVideo(true);
 
-    await addView(item.id); // call view endpoint
+    await addView(item.id);
   };
 
-  // API Calls
   const addView = async (video_id) => {
-
-      if (!userId) {
-    console.log(" addView aborted: userId missing");
-    return;
-  }
+    if (!userId) return;
     try {
       const token = await getToken();
-      const device_id = "123456"; // can use device info
-      await axios.post(config.PLAY,
-        { user_id: userId, video_id, device_id },
+      await axios.post(
+        config.PLAY,
+        { user_id: userId, video_id, device_id: "123456" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (error) {
@@ -143,68 +108,7 @@ export default function VideoPlayer({ route, navigation }) {
     }
   };
 
-  const handleLikeAPI = async () => {
-    if (likedStatus === "like") return; // already liked
-    setLoadingAction(true);
-    try {
-      const token = await getToken();
-      const device_id = "123456";
-      await axios.post(config.LIKES,
-        { user_id: userId, video_id: currentVideo.id, device_id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (error) {
-      //Alert.alert("Error", "Like failed");
-    } finally {
-      setLoadingAction(false);
-    }
-  };
-
-  const handleDislikeAPI = async () => {
-    if (likedStatus === "dislike") return; // already disliked
-    setLoadingAction(true);
-    try {
-      const token = await getToken();
-      const device_id = "123456";
-      await axios.post(config.DISLIKES,
-        { user_id: userId, video_id: currentVideo.id, device_id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (error) {
-      //Alert.alert("Error", "Dislike failed");
-    } finally {
-      setLoadingAction(false);
-    }
-  };
-
-  const handleAddComment = async () => {
-    if (commentText.trim() === "") return;
-
-    setLoadingAction(true);
-    try {
-      const token = await getToken();
-      const device_id = "123456";
-      await axios.post(config.COMMENTS,
-        {
-          user_id: userId,
-          video_id: currentVideo.id,
-          device_id,
-          comment: commentText,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const newComment = { id: Date.now().toString(), user: "You", text: commentText };
-      setComments([newComment, ...comments]);
-      setCommentText("");
-    } catch (error) {
-      //Alert.alert("Error", "Failed to add comment");
-    } finally {
-      setLoadingAction(false);
-    }
-  };
-
-  // Animation functions
+  /* ------------------ LIKE / DISLIKE ------------------ */
   const handleLike = () => {
     Animated.sequence([
       Animated.timing(likeAnim, { toValue: 1.2, duration: 150, useNativeDriver: true }),
@@ -239,36 +143,77 @@ export default function VideoPlayer({ route, navigation }) {
     }
   };
 
+  const handleLikeAPI = async () => {
+    if (likedStatus === "like") return;
+    setLoadingAction(true);
+    try {
+      const token = await getToken();
+      await axios.post(
+        config.LIKES,
+        { user_id: userId, video_id: currentVideo.id, device_id: "123456" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch {}
+    finally { setLoadingAction(false); }
+  };
+
+  const handleDislikeAPI = async () => {
+    if (likedStatus === "dislike") return;
+    setLoadingAction(true);
+    try {
+      const token = await getToken();
+      await axios.post(
+        config.DISLIKES,
+        { user_id: userId, video_id: currentVideo.id, device_id: "123456" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch {}
+    finally { setLoadingAction(false); }
+  };
+
+  const handleAddComment = async () => {
+    if (commentText.trim() === "") return;
+    setLoadingAction(true);
+    try {
+      const token = await getToken();
+      await axios.post(
+        config.COMMENTS,
+        {
+          user_id: userId,
+          video_id: currentVideo.id,
+          device_id: "123456",
+          comment: commentText,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const newComment = { id: Date.now().toString(), user: "You", text: commentText };
+      setComments([newComment, ...comments]);
+      setCommentText("");
+    } catch {}
+    finally { setLoadingAction(false); }
+  };
+
+  /* ------------------ UI ------------------ */
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       {/* VIDEO PLAYER */}
-      {isYouTube(currentVideo.video_url) ? (
-        <WebView
+      <View style={{ width: "100%", height: 300, backgroundColor: "#000" }}>
+        <Video
+          ref={videoRef}
+          source={{ uri: currentVideo.video_url }}
           style={{ width: "100%", height: 300 }}
-          javaScriptEnabled
-          domStorageEnabled
-          allowsFullscreenVideo
-          source={{ uri: currentVideo.video_url.replace("watch?v=", "embed/") }}
+          useNativeControls
+          resizeMode="contain"
+          shouldPlay
+          onLoadStart={handleLoadStart}
+          onLoad={handleLoadEnd}
         />
-      ) : (
-        <View style={{ width: "100%", height: 300, backgroundColor: "#000" }}>
-          <Video
-            ref={videoRef}
-            source={{ uri: currentVideo.video_url }}
-            style={{ width: "100%", height: 300 }}
-            useNativeControls
-            resizeMode="contain" 
-            shouldPlay
-            onLoadStart={handleLoadStart}
-            onLoad={handleLoadEnd}
-          />
-          {loadingVideo && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#cb880a" />
-            </View>
-          )}
-        </View>
-      )}
+        {loadingVideo && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#cb880a" />
+          </View>
+        )}
+      </View>
 
       {/* TITLE */}
       <Text style={styles.title}>{currentVideo.title}</Text>
@@ -329,8 +274,8 @@ export default function VideoPlayer({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {comments.map((c) => (
-            <View key={c.id} style={styles.commentItem}>
+          {comments.map((c, index) => (
+            <View key={`${c?.id ?? index}-${index}`} style={styles.commentItem}>
               <Text style={styles.commentUser}>{c.user}</Text>
               <Text style={styles.commentText}>{c.text}</Text>
             </View>
@@ -338,14 +283,11 @@ export default function VideoPlayer({ route, navigation }) {
         </View>
       )}
 
-      {/* VIDEO QUALITY FILTER */}
-    
-
       {/* RELATED VIDEOS */}
-      <Text style={styles.sectionTitle}>Purchase Videos | store </Text>
+      <Text style={styles.sectionTitle}> Videos List | Video Store</Text>
       <FlatList
         data={apiRelatedVideos}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.videoItem} onPress={() => loadNewVideo(item)}>
             <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
@@ -356,27 +298,11 @@ export default function VideoPlayer({ route, navigation }) {
           </TouchableOpacity>
         )}
       />
-
-       {/* RELATED VIDEOS */}
-      {/* <Text style={styles.sectionTitle}>Latest Videos | Trends </Text> */}
-      <FlatList
-        data={[]}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.videoItem} onPress={() => loadNewVideo(item)}>
-            <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
-            <View style={{ flex: 2, paddingLeft: 10 }}>
-              <Text style={styles.videoTitle}>{item.title}</Text>
-              <Text style={styles.smallText}>{item.views} views | {item.likes} likes</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
     </View>
   );
 }
 
-// STYLES
+/* ------------------ STYLES ------------------ */
 const styles = StyleSheet.create({
   title: { color: "#fff", fontSize: 20, fontWeight: "bold", padding: 10 },
   actionRow: { flexDirection: "row", paddingHorizontal: 10, alignItems: "center", marginBottom: 10, gap: 10 },
@@ -386,7 +312,7 @@ const styles = StyleSheet.create({
   likeDislikeBtnActive: { backgroundColor: "#1a3a52" },
   likeDislikeIcon: { fontSize: 18, marginRight: 6 },
   likeDislikeText: { color: "#aaa", fontSize: 13, fontWeight: "600" },
-  likeDislikeTextActive: { color: "#1a73e8" },
+  likeDislikeTextActive: { color: "#062930" },
   divider: { width: 1, height: 20, backgroundColor: "#444" },
   commentBtn: { flexDirection: "row", alignItems: "center", backgroundColor: "#222", borderRadius: 20, paddingVertical: 8, paddingHorizontal: 12, gap: 4 },
   commentIcon: { fontSize: 16 },
@@ -396,15 +322,11 @@ const styles = StyleSheet.create({
   sendBtn: { backgroundColor: "#1a73e8", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
   commentItem: { marginBottom: 10 },
   commentUser: { color: "#1a73e8", fontWeight: "600" },
-  commentText: { color: "#fff" },
+  commentText: { color: "#e0e0e0" },
   sectionTitle: { color: "#fff", fontSize: 18, marginTop: 10, paddingHorizontal: 10 },
   videoItem: { flexDirection: "row", marginVertical: 10, paddingHorizontal: 10, alignItems: "center" },
   thumbnail: { width: 140, height: 80, borderRadius: 8 },
   videoTitle: { color: "#fff", fontSize: 16, fontWeight: "600" },
   smallText: { color: "#aaa", fontSize: 12 },
   loadingOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center" },
-  qualityRow: { flexDirection: "row", justifyContent: "center", gap: 8, marginVertical: 10 },
-  qualityBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, borderWidth: 1, borderColor: "#555" },
-  qualityBtnActive: { borderColor: "#1a73e8", backgroundColor: "#222" },
-  qualityText: { color: "#fff" },
 });

@@ -32,7 +32,7 @@ const ProfileScreen = ({ route }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a237e" />
+        <ActivityIndicator size="large" color="#062930" />
       </View>
     );
   }
@@ -57,35 +57,35 @@ const ProfileScreen = ({ route }) => {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Profile Image Placeholder */}
       <View style={styles.profileImagePlaceholder}>
-        <Icon name="user-circle" size={120} color="#1a237e" />
+        <Icon name="user-circle" size={120} color="#062930" />
       </View>
 
       {/* User Information */}
       <View style={styles.infoContainer}>
         <View style={styles.infoItem}>
-          <Icon name="user" size={20} color="#1a237e" style={styles.icon} />
+          <Icon name="user" size={20} color="#e0e0e0" style={styles.icon} />
           <Text style={styles.infoText}>
             {user.first_name} {user.family_name}
           </Text>
         </View>
         
         <View style={styles.infoItem}>
-          <Icon name="phone" size={20} color="#1a237e" style={styles.icon} />
+          <Icon name="phone" size={20} color="#e0e0e0" style={styles.icon} />
           <Text style={styles.infoText}>{user.us_phone || 'N/A'}</Text>
         </View>
         
         <View style={styles.infoItem}>
-          <Icon name="envelope" size={20} color="#1a237e" style={styles.icon} />
+          <Icon name="envelope" size={20} color="#e0e0e0" style={styles.icon} />
           <Text style={styles.infoText}>{user.email || 'N/A'}</Text>
         </View>
         
         <View style={styles.infoItem}>
-          <Icon name="id-card" size={20} color="#1a237e" style={styles.icon} />
+          <Icon name="id-card" size={20} color="#e0e0e0" style={styles.icon} />
           <Text style={styles.infoText}>Account code: {user.account_id}</Text>
         </View>
         
         <View style={styles.infoItem}>
-          <Icon name="calendar" size={20} color="#1a237e" style={styles.icon} />
+          <Icon name="calendar" size={20} color="#e0e0e0" style={styles.icon} />
           <Text style={styles.infoText}>Member since: {user.reg_date}</Text>
         </View>
         
@@ -98,7 +98,7 @@ const ProfileScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
     alignItems: 'center',
     padding: 20,
   },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 75,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#cb880aff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: '#333',
+    color: '#e0e0e0',
     flex: 1,
   },
 });

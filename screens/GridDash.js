@@ -102,7 +102,7 @@ const Dashboard = ({ navigation }) => {
         <FlatList
           data={defaultActions}
           renderItem={renderGridItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
           numColumns={2}
           contentContainerStyle={styles.gridContainer}
         />
@@ -110,7 +110,7 @@ const Dashboard = ({ navigation }) => {
         <FlatList
           data={defaultActions}
           renderItem={renderListItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
           contentContainerStyle={styles.listContainer}
         />
       )}

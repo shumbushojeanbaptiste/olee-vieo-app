@@ -20,7 +20,7 @@ const OnboardingScreen = ({ navigation }) => {
         showDone={false} // Hide the default Done button
         pages={[
           {
-            backgroundColor: '#fff',
+            backgroundColor: '#000',
             image: (
               <Image
                 source={require('../assets/live.png')} // Replace with your image path
@@ -31,7 +31,7 @@ const OnboardingScreen = ({ navigation }) => {
             subtitle: 'Your ultimate video streaming app, anytime, anywhere',
           },
           {
-            backgroundColor: '#fff',
+            backgroundColor: '#000',
             image: (
               <Image
                 source={require('../assets/tv.png')} // Replace with your image path
@@ -42,7 +42,7 @@ const OnboardingScreen = ({ navigation }) => {
             subtitle: 'Get real-time updates on available videos',
           },
           {
-            backgroundColor: '#fff',
+            backgroundColor: '#000',
             image: (
               <Image
                 source={require('../assets/enounce.png')} // Replace with your image path
@@ -68,7 +68,7 @@ const OnboardingScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
   buttonContainer: {
     position: 'absolute', // Position the button container absolutely
@@ -78,21 +78,21 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center the button horizontally
   },
   doneButton: {
-    backgroundColor: '#000', // Button background color
+    backgroundColor: '#cb880aff', // Button background color
     paddingHorizontal: 40, // Horizontal padding for width
     paddingVertical: 15, // Vertical padding for height
     borderRadius: 30, // Rounded corners
     alignItems: 'center', // Center text horizontally
     justifyContent: 'center', // Center text vertically
     elevation: 5, // Shadow for Android
-    shadowColor: '#000', // Shadow color for iOS
+    shadowColor: '#124650', // Shadow color for iOS
     shadowOffset: { width: 0, height: 2 }, // Shadow offset for iOS
     shadowOpacity: 0.3, // Shadow opacity for iOS
     shadowRadius: 3, // Shadow radius for iOS
     width: '80%', // Set button width to 80% of the screen
   },
   doneButtonText: {
-    color: '#fff', // White text color
+    color: '#1a1a1a', // White text color
     fontSize: 18, // Font size
     fontWeight: 'bold', // Bold text
   },

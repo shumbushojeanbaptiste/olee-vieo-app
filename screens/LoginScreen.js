@@ -9,8 +9,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import config from "../config/config";
@@ -92,9 +93,11 @@ export default function LoginScreen({ navigation }) {
           type: 'success',
           text1: 'Login Successful',
           text2: data.message,
+          visibilityTime: 2000,
         });
 
-        setTimeout(() => navigation.replace("Dashboard"), 1000);
+        // Wait until the toast finishes showing before redirecting
+        setTimeout(() => navigation.replace("Dashboard"), 2200);
       } else {
         throw new Error(data.message || "Login failed");
       }
@@ -104,6 +107,7 @@ export default function LoginScreen({ navigation }) {
         type: "error",
         text1: "Login Failed",
         text2: error.response?.data?.message || error.message,
+        visibilityTime: 3000,
       });
     } finally {
       setIsLoading(false);
@@ -124,7 +128,7 @@ export default function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Image source={require('../assets/userLogin.png')} style={styles.userIcon} />
-      <Text style={styles.title}>OleePlay</Text>
+      <Text style={styles.title}>Olee Play</Text>
       <Text style={styles.subtitle}>Watch. Learn. Enjoy.</Text>
 
       <TextInput
@@ -157,7 +161,7 @@ export default function LoginScreen({ navigation }) {
           ) : (
             <>
               <Text style={styles.loginButtonText}>Log in</Text>
-              <Icon name="long-arrow-right" size={20} color="#fff" style={{ marginLeft: 10 }} />
+              <Icon name="long-arrow-right" size={20} color="#000" style={{ marginLeft: 10 }} />
             </>
           )}
         </View>
@@ -170,20 +174,19 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.createAccountText}>Create an account</Text>
       </TouchableOpacity>
 
-      <Toast />
     </View>
   );
 }
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  container: { flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', padding: 20 },
   userIcon: { width: 120, height: 120, marginBottom: 30, borderRadius: 60 },
-  title: { fontSize: 32, fontWeight: '800', marginBottom: 10, color: '#000' },
-  subtitle: { fontSize: 16, color: '#54598dff', marginBottom: 30 },
+  title: { fontSize: 32, fontWeight: '800', marginBottom: 10, color: '#cb880aff' },
+  subtitle: { fontSize: 16, color: '#fff', marginBottom: 30 },
   input: {
     width: '85%', height: 50, borderWidth: 1,
-    borderColor: '#ddd', borderRadius: 8,
+    borderColor: '#062930', borderRadius: 8,
     paddingLeft: 15, marginBottom: 15,
     backgroundColor: '#f8f8f8'
   },
@@ -193,10 +196,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'center'
   },
   disabledButton: { opacity: 0.7 },
-  loginButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  loginButtonText: { color: '#000', fontSize: 16, fontWeight: 'bold' },
   buttonContent: { flexDirection: 'row', alignItems: 'center' },
   createAccountButton: {
-    width: '85%', padding: 15, backgroundColor: '#fff',
+    width: '85%', padding: 15, backgroundColor: '#000',
     borderRadius: 25, marginTop: 15, alignItems: 'center',
     borderWidth: 2, borderColor: '#cb880aff'
   },

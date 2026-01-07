@@ -1,5 +1,5 @@
 // config.js
-const BASE_URL = "http://192.168.1.104:5000/api"; // Base API URL
+const BASE_URL = "https://olee.maafricapay.com/api"; // Base API URL
 
 export default {
   BASE_URL,
@@ -17,6 +17,8 @@ export default {
   VIDEO_CATEGORY: `${BASE_URL}/settings/videoCategories`,
   RELATED_VIDEOS: `${BASE_URL}/videos/trends`,
   STORE_VIDEOS: `${BASE_URL}/videos/trends`,
+  SEARCH_VIDEO: `${BASE_URL}/accessible/latest-video`,
+  BY_CATEGORY: `${BASE_URL}/videos/trends`,
   
 
   BUY_VIDEO: `${BASE_URL}/payments/buy-video`,

@@ -106,7 +106,7 @@ const ChatScreen = ({ navigation }) => {
       <FlatList
         ref={flatListRef}
         data={messages}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => `${item?.id ?? index}-${index}`}
         renderItem={({ item }) => (
           <View style={[
             styles.messageContainer,

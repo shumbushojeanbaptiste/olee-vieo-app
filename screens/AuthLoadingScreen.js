@@ -32,11 +32,11 @@ export default function AuthLoadingScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#cb880aff" />
+      <ActivityIndicator size="large" color="#cb880aff" />062930
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' },
 });
